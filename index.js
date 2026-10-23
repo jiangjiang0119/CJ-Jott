@@ -28355,7 +28355,10 @@ function applyDiyColors(c) {
   if (c.panel) {
     css += `.t-header,.t-window-header,.t-dialog-header,.t-model-dialog-header,.t-sel-header,.t-wi-header,.t-queue-header,.t-ce-header,.t-read-header,.t-recall-header,.t-top-bar,.t-bottom-bar,.t-mgr-toolbar,.t-mgr-overview,.t-fav-toolbar,.t-fav-toolbar-edit,.t-lore-controls,.t-config-info-bar,.t-mode-tabs,.t-set-nav,.t-mgr-sidebar,.t-sel-sidebar,.t-dbg-sidebar,.t-dbg-header-bar,.t-dbg-footer,.t-section-label,.t-fold-head,.t-window-footer,.t-dialog-footer,.t-model-dialog-footer,.t-wi-footer,.t-queue-footer,.t-ce-footer,.t-sel-footer,.t-recall-footer,.t-wi-mode-bar,.t-wi-books-pane,.t-wi-entry-pane,.t-wi-books-header,.t-wi-entry-pane-header,.t-lore-list-container,.t-list-header,.t-outline-top,.t-hub-toolbar,.t-outline-plan-list,.t-outline-table-wrap,.t-outline-scene-editor-page,.t-scene-hub-list,#t-debug-view .t-prompt-top-summary,#t-debug-view .t-prompt-toolbar,#t-outline-prompt-manager .t-set-nav,#t-lore-settings-dialog .t-set-nav,#t-rewrite-settings-overlay .t-set-nav,#t-rewrite-overlay .t-rewrite-head,#t-rewrite-overlay .t-rewrite-footer-actions,#t-rewrite-settings-overlay .t-rewrite-settings-footer,.t-box div[style*="background:#181818"],.t-box div[style*="background: #181818"],.t-box div[style*="background:#1a1a1a"],.t-box div[style*="background: #1a1a1a"],.t-box div[style*="background:#2a2a2a"],.t-box div[style*="background: #2a2a2a"]{background:${c.panel}!important;background-color:${c.panel}!important;background-image:none!important;}`;
   }
-  function applyDiyColors2(c, el) {
+  el.textContent = css;
+  if (typeof applyDiyColors2 === "function") applyDiyColors2(c, el);
+}
+function applyDiyColors2(c, el) {
   const wBg = c.card || c.panel || c.bg;
   let css = "";
   if (wBg) {
