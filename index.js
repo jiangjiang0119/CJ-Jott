@@ -27175,7 +27175,53 @@ function openSettingsWindow() {
                 </div>
 
                 <!-- Tab 3: \u8FDE\u63A5 -->
-                <div id="page-colors" class="t-set-page"><div class="t-form-group"><label class="t-form-label">1. 整体背景色 (原: #121212)</label><input id="diy-bg" class="t-input" placeholder="#fdfcfb" value="${data.ui_colors?.bg||''}"></div><div class="t-form-group"><label class="t-form-label">2. 面板&按钮底色 (原: #1e1e1e)</label><input id="diy-panel" class="t-input" placeholder="#ffffff" value="${data.ui_colors?.panel||''}"></div><div class="t-form-group"><label class="t-form-label">3. 边框颜色 (原: #333333)</label><input id="diy-border" class="t-input" placeholder="#f0e6d2" value="${data.ui_colors?.border||''}"></div><div class="t-form-group"><label class="t-form-label">4. 字体颜色 (原: #eeeeee)</label><input id="diy-txt" class="t-input" placeholder="#555555" value="${data.ui_colors?.txt||''}"></div><div class="t-form-group"><label class="t-form-label">5. 主题高亮色 (原: #bfa15f)</label><input id="diy-theme" class="t-input" placeholder="#ffb6c1" value="${data.ui_colors?.theme||''}"></div></div><div id="page-connection" class="t-set-page">
+                <div id="page-colors" class="t-set-page">
+    <div style="padding:12px; border-radius:6px; border:1px solid #444; margin-bottom:15px; font-size:0.85em;">
+        ✨ <b>全覆盖高定调色盘</b>：点击左侧色块可直接取色，右侧支持手填色号（如 <code>#fff0f5</code> 或 <code>rgba(255,255,255,0.9)</code>）。清空格子再保存即可恢复原版配色～
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">1. 整体大背景色 (主窗口底色 / 内容网格区)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.bg||'#121212'}" oninput="document.getElementById('diy-bg').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-bg" class="t-input" placeholder="例如: #fdfcfb" value="${data.ui_colors?.bg||''}">
+        </div>
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">2. 导航栏 & 面板底色 (顶栏 / 底栏 / 侧边栏)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.panel||'#1e1e1e'}" oninput="document.getElementById('diy-panel').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-panel" class="t-input" placeholder="例如: #fff5f7" value="${data.ui_colors?.panel||''}">
+        </div>
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">3. 小部件 & 输入框底色 (卡片 / 按钮 / 下拉框 / 开关 / 内部说明框)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.card||'#252525'}" oninput="document.getElementById('diy-card').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-card" class="t-input" placeholder="例如: #ffffff" value="${data.ui_colors?.card||''}">
+        </div>
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">4. 全局边框 & 分割线颜色</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.border||'#333333'}" oninput="document.getElementById('diy-border').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-border" class="t-input" placeholder="例如: #f0e6d2" value="${data.ui_colors?.border||''}">
+        </div>
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">5. 全局字体 & 图标颜色</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.txt||'#eeeeee'}" oninput="document.getElementById('diy-txt').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-txt" class="t-input" placeholder="例如: #5c4b51" value="${data.ui_colors?.txt||''}">
+        </div>
+    </div>
+    <div class="t-form-group">
+        <label class="t-form-label">6. 主题高亮色 (主按钮 / 选中状态 / 标签点缀)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <input type="color" value="${data.ui_colors?.theme||'#bfa15f'}" oninput="document.getElementById('diy-theme').value=this.value" style="width:45px; height:36px; border:none; cursor:pointer; background:transparent; flex-shrink:0;">
+            <input id="diy-theme" class="t-input" placeholder="例如: #ffb6c1" value="${data.ui_colors?.theme||''}">
+        </div>
+    </div>
+</div><div id="page-connection" class="t-set-page">
                     ${renderApiConnectionEditorHTML({
     ids: {
       profileSelectId: "cfg-prof-select",
@@ -28253,10 +28299,18 @@ ${JSON.stringify(l.details, null, 2)}`;
       ...prevOutlineEntry,
       enabled: prevOutlineEntry.enabled === true
     };
-    const prevRewriteEntry = d.rewrite_entry || {};
+   const prevRewriteEntry = d.rewrite_entry || {};
     d.rewrite_entry = {
       ...prevRewriteEntry,
-      enabled: prevRewriteEntry.enabled === true }; d.ui_colors = { bg: $("#diy-bg").val().trim(), panel: $("#diy-panel").val().trim(), border: $("#diy-border").val().trim(), txt: $("#diy-txt").val().trim(), theme: $("#diy-theme").val().trim()
+      enabled: prevRewriteEntry.enabled === true
+    };
+    d.ui_colors = {
+      bg: $("#diy-bg").val().trim(),
+      panel: $("#diy-panel").val().trim(),
+      card: $("#diy-card").val().trim(),
+      border: $("#diy-border").val().trim(),
+      txt: $("#diy-txt").val().trim(),
+      theme: $("#diy-theme").val().trim()
     };
     saveExtData();
     $("#t-settings-view").remove();
@@ -28269,7 +28323,8 @@ ${JSON.stringify(l.details, null, 2)}`;
     createFloatingButton();
     refreshOutlineEntryButton();
     refreshRewriteEntryButton();
-    let dCss="";if(d.ui_colors){let v=[];if(d.ui_colors.bg)v.push("--t-bg-dark:"+d.ui_colors.bg+"!important;");if(d.ui_colors.panel)v.push("--t-bg-panel:"+d.ui_colors.panel+"!important;");if(d.ui_colors.theme)v.push("--t-theme:"+d.ui_colors.theme+"!important;");if(d.ui_colors.border)v.push("--t-border:"+d.ui_colors.border+"!important;");if(v.length>0)dCss+=":root{"+v.join("")+"} ";let x=[];if(d.ui_colors.bg)x.push(".t-box,.t-content-wrapper,.t-mgr-main,.t-set-content,.t-window-body,.t-outline-body,#t-output-content{background:"+d.ui_colors.bg+"!important;}");if(d.ui_colors.txt)x.push(".t-box,.t-form-label,.t-btn,.t-title-main,.t-window-title{color:"+d.ui_colors.txt+"!important;-webkit-text-fill-color:initial!important;background:none!important;}");if(d.ui_colors.panel)x.push(".t-top-bar,.t-bottom-bar,.t-header,.t-mgr-toolbar,.t-set-nav,.t-btn{background:"+d.ui_colors.panel+"!important;}");if(d.ui_colors.border)x.push(".t-top-bar,.t-bottom-bar,.t-header,.t-mgr-toolbar,.t-set-nav,.t-btn,.t-input{border-color:"+d.ui_colors.border+"!important;}");if(x.length>0)dCss+=x.join(" ");}applyCustomCSS((d.custom_css||"")+" "+dCss);
+    applyCustomCSS(d.custom_css || "");
+    applyDiyColors(d.ui_colors);
     applyFontSettings(d.font_settings);
     applyUIFontScale(d.appearance?.ui_font_scale);
     if (window.toastr) toastr.success("\u8BBE\u7F6E\u5DF2\u4FDD\u5B58");
@@ -28281,6 +28336,47 @@ function applyUIFontScale(scalePercent = 100) {
   const n = Number(scalePercent);
   const clamped = Number.isFinite(n) ? Math.max(80, Math.min(130, n)) : 100;
   document.documentElement.style.setProperty("--t-ui-font-scale", (clamped / 100).toFixed(2));
+  try { applyDiyColors(getExtData().ui_colors); } catch (e) {}
+}
+function applyDiyColors(c) {
+  let el = document.getElementById("t-diy-colors-style");
+  if (!el) { el = document.createElement("style"); el.id = "t-diy-colors-style"; document.head.appendChild(el); }
+  if (!c || (!c.bg && !c.panel && !c.card && !c.border && !c.txt && !c.theme)) { el.textContent = ""; return; }
+  const wBg = c.card || c.panel || c.bg;
+  let css = ":root {";
+  if (c.bg) css += `--t-bg-dark:${c.bg}!important;`;
+  if (c.panel) css += `--t-bg-panel:${c.panel}!important;`;
+  if (c.border) css += `--t-border:${c.border}!important;`;
+  if (c.theme) css += `--t-theme:${c.theme}!important;`;
+  css += "}\n";
+  if (c.bg) {
+    css += `.t-box,#t-main-view,#t-settings-view,#t-mgr-view,#t-editor-view,#t-large-edit-view,#t-debug-view,#t-diagnostics-view,.t-fav-container,.t-lore-review-window,.t-story-outline-window,.titania-recall-panel,.t-content-wrapper,.t-content-area,.t-mgr-main,.t-set-content,.t-window-body,.t-outline-body,.t-fav-grid-area,.t-fav-carousel-stage,.t-fav-reader,.t-read-body,#t-read-capture-zone,.t-dbg-container,.t-dbg-main,.t-code-viewer,#t-debug-view .t-prompt-sections,.t-lore-editor-container,.t-dialog-box,.t-model-dialog-box,.t-imp-box,.t-img-mgr-box,.t-wi-preview-box,#t-rewrite-overlay .t-rewrite-window,#t-rewrite-settings-overlay .t-rewrite-settings-window,#t-rewrite-live-overlay .t-rewrite-live-window,#t-rewrite-overlay .t-rewrite-body,#t-rewrite-settings-overlay .t-set-content,#t-rewrite-live-overlay .t-rewrite-live-body,#t-outline-prompt-manager .t-set-content,#t-lore-settings-dialog .t-set-content,.t-content-editor,.t-queue-settings,.t-wi-selector,.t-selector-panel{background:${c.bg}!important;background-image:none!important;}.t-fav-container::before{display:none!important;}`;
+  }
+  if (c.panel) {
+    css += `.t-header,.t-window-header,.t-dialog-header,.t-model-dialog-header,.t-sel-header,.t-wi-header,.t-queue-header,.t-ce-header,.t-read-header,.t-recall-header,.t-top-bar,.t-bottom-bar,.t-mgr-toolbar,.t-mgr-overview,.t-fav-toolbar,.t-fav-toolbar-edit,.t-lore-controls,.t-config-info-bar,.t-mode-tabs,.t-set-nav,.t-mgr-sidebar,.t-sel-sidebar,.t-dbg-sidebar,.t-dbg-header-bar,.t-dbg-footer,.t-section-label,.t-fold-head,.t-window-footer,.t-dialog-footer,.t-model-dialog-footer,.t-wi-footer,.t-queue-footer,.t-ce-footer,.t-sel-footer,.t-recall-footer,.t-wi-mode-bar,.t-wi-books-pane,.t-wi-entry-pane,.t-wi-books-header,.t-wi-entry-pane-header,.t-lore-list-container,.t-list-header,.t-outline-top,.t-hub-toolbar,.t-outline-plan-list,.t-outline-table-wrap,.t-outline-scene-editor-page,.t-scene-hub-list,#t-debug-view .t-prompt-top-summary,#t-debug-view .t-prompt-toolbar,#t-outline-prompt-manager .t-set-nav,#t-lore-settings-dialog .t-set-nav,#t-rewrite-settings-overlay .t-set-nav,#t-rewrite-overlay .t-rewrite-head,#t-rewrite-overlay .t-rewrite-footer-actions,#t-rewrite-settings-overlay .t-rewrite-settings-footer,.t-box div[style*="background:#181818"],.t-box div[style*="background: #181818"],.t-box div[style*="background:#1a1a1a"],.t-box div[style*="background: #1a1a1a"],.t-box div[style*="background:#2a2a2a"],.t-box div[style*="background: #2a2a2a"]{background:${c.panel}!important;background-color:${c.panel}!important;background-image:none!important;}`;
+  }
+  function applyDiyColors2(c, el) {
+  const wBg = c.card || c.panel || c.bg;
+  let css = "";
+  if (wBg) {
+    css += `.t-trigger-card,.t-history-toggle,.t-mode-toggle,.t-mode-btn,.t-filter-btn,.t-dice-btn,.t-btn-grid,.t-btn-aux,.t-btn,.t-tool-btn,.t-tools-btn,.t-tools-panel,.t-filter-popover,.t-box .t-input,.t-input,.t-prof-select,.t-mgr-search,.t-mgr-sort,.t-mgr-cat-dropdown,.t-sel-search-input,.t-sel-sort-select,.t-fav-filter-select,.t-fav-search,.t-queue-select,.t-outline-select,.t-outline-input,.t-outline-textarea,.t-outline-story-input,.t-outline-plan-name,.t-plan-name-wrap,.t-ce-textarea,.t-code-editor,.t-code-textarea,.t-simple-editor,.t-log-box,.t-outline-raw-pre,.t-outline-raw-editor,.t-prompt-pre,.t-script-card,.t-mgr-item,.t-anim-option,.t-preview-container,.t-css-hints,.t-toolbar-config,.t-toolbar-item,.t-wi-book-header,.t-wi-entry,.t-wi-book-item,.t-queue-mode-btn,.t-queue-num-btn,.t-queue-script-list,.t-queue-script-item,.t-fav-thumb,.t-img-item,.t-act-btn,.t-fav-export-sheet,.t-fav-export-sheet-btn,.t-fav-export-sheet-cancel,#t-debug-view .t-prompt-section-card,#t-debug-view .t-prompt-section-head,#t-debug-view .t-prompt-seg-btn,#t-debug-view .t-prompt-tool-btn,#t-debug-view .t-prompt-total-token,.t-lore-entry-item,.t-lore-editor input[type="text"],.t-lore-editor select,.t-lore-editor textarea,.t-static-text,.t-control-group select,.t-control-group input,.t-target-select select,.t-quick-btn,.t-summary-result,.t-vector-status-card,.t-vector-actions-card,.t-vector-info,.t-custom-prompt-section,.t-custom-prompt-header,.t-custom-prompt-body textarea,.t-save-mode-section,.t-radio-label,.t-profile-info-box,.t-plan-accordion-item,.t-plan-accordion-head,.t-plan-card-actions,.t-plan-item-block,.t-plan-scene,.t-scene-page-card,.t-scene-hub-item,.t-opening-picker-item,.t-opening-card,.t-outline-table th,.t-outline-scene-wrap,.t-outline-scene-table th,.t-outline-desktop-editor,.t-desk-scene-block,.t-outline-mobile-card,.t-outline-mobile-drawer,.t-mobile-scene-card,.t-recall-query-input,.t-recall-options select,.t-recall-action-btn,.t-recall-result-item,.t-recall-btn-secondary,#t-rewrite-overlay .t-rewrite-section,#t-rewrite-overlay .t-rewrite-match-row,#t-rewrite-overlay .t-rewrite-diff-cell,#t-rewrite-overlay .t-rewrite-json-box,#t-rewrite-settings-overlay .t-form-group,#t-rewrite-settings-overlay .text_pole,#t-rewrite-settings-overlay .t-rewrite-settings-textarea,#t-rewrite-live-overlay .t-rewrite-live-stream-card,#t-rewrite-live-overlay .t-rewrite-live-history-card,#t-rewrite-live-overlay .t-rewrite-live-history-item,#t-rewrite-live-overlay .t-rewrite-json-box,#t-lore-settings-dialog .t-form-group,#t-lore-settings-dialog .t-input,.t-cat-tag,.t-mgr-tag,.t-entry-tag,.t-version-badge,.t-box div[style*="background:#222"],.t-box div[style*="background: #222"],.t-box label[style*="background:#222"],.t-box label[style*="background: #222"],.t-box div[style*="background:#111"],.t-box div[style*="background: #111"],.t-box div[style*="background:#1a1a2e"],.t-box div[style*="background:#2e1a2e"],.t-box div[style*="background:#1e1e1e"],.t-box button[style*="background:#262626"],.t-box div[style*="background:#1b1b1b"],.t-box code[style*="background:#333"],.t-css-hint-item code{background:${wBg}!important;background-color:${wBg}!important;background-image:none!important;}`;
+  }
+  el.textContent += css;
+  if (typeof applyDiyColors3 === "function") applyDiyColors3(c, el);
+}
+function applyDiyColors3(c, el) {
+  let css = "";
+  if (c.border) {
+    css += `.t-box,.t-header,.t-top-bar,.t-bottom-bar,.t-trigger-card,.t-history-toggle,.t-mode-toggle,.t-mode-btn,.t-filter-btn,.t-dice-btn,.t-btn-grid,.t-btn-aux,.t-btn,.t-tool-btn,.t-tools-btn,.t-tools-panel,.t-filter-popover,.t-box .t-input,.t-input,.t-prof-select,.t-mgr-toolbar,.t-mgr-overview,.t-mgr-sidebar,.t-mgr-sb-group,.t-mgr-item,.t-mgr-search,.t-mgr-sort,.t-set-nav,.t-form-row,.t-preview-container,.t-anim-option,.t-upload-card,.t-log-box,.t-css-hints,.t-css-hint-item,.t-toolbar-config,.t-selector-panel,.t-sel-header,.t-sel-sidebar,.t-script-card,.t-sel-footer,.t-sel-search-input,.t-sel-sort-select,.t-wi-selector,.t-wi-header,.t-wi-mode-bar,.t-wi-books-pane,.t-wi-books-header,.t-wi-entry-pane,.t-wi-entry-pane-header,.t-wi-entry,.t-wi-footer,.t-queue-settings,.t-queue-header,.t-queue-mode-btn,.t-queue-num-btn,.t-queue-select,.t-queue-script-list,.t-queue-footer,.t-content-editor,.t-ce-header,.t-ce-textarea,.t-ce-footer,.t-fav-container,.t-fav-toolbar,.t-fav-filter-select,.t-fav-search,.t-fav-carousel-stage,.t-fav-thumb,.t-read-header,.t-img-mgr-box,.t-img-item,.t-act-btn,.t-dbg-header-bar,.t-dbg-sidebar,.t-param-group,.t-editor-section,.t-section-label,.t-dbg-footer,.t-fold-row,#t-debug-view .t-prompt-top-summary,#t-debug-view .t-prompt-toolbar,#t-debug-view .t-prompt-seg-group,#t-debug-view .t-prompt-seg-btn,#t-debug-view .t-prompt-tool-btn,#t-debug-view .t-prompt-section-card,#t-debug-view .t-prompt-section-head,.t-lore-review-window,.t-window-header,.t-config-info-bar,.t-lore-controls,.t-lore-list-container,.t-list-header,.t-lore-entry-item,.t-editor-header,.t-window-footer,.t-mode-tabs,.t-mode-tab,.t-summary-header,.t-summary-result,.t-vector-status-card,.t-vector-actions-card,.t-custom-prompt-section,.t-story-outline-window,.t-outline-top,.t-outline-story-input,.t-outline-select,.t-outline-input,.t-outline-textarea,.t-plan-name-wrap,.t-outline-plan-name,.t-hub-toolbar,.t-outline-plan-list,.t-plan-accordion-item,.t-plan-accordion-head,.t-plan-card-actions,.t-plan-item-block,.t-plan-scene,.t-outline-table-wrap,.t-outline-table th,.t-outline-table td,.t-outline-scene-wrap,.t-scene-page-card,.t-scene-hub-list,.t-scene-hub-item,.t-dialog-box,.t-dialog-header,.t-dialog-footer,.t-imp-box,#t-rewrite-overlay .t-rewrite-window,#t-rewrite-overlay .t-rewrite-head,#t-rewrite-overlay .t-rewrite-section,#t-rewrite-overlay .t-rewrite-footer-actions,#t-rewrite-overlay .t-rewrite-match-row,#t-rewrite-overlay .t-rewrite-diff-cell,#t-rewrite-settings-overlay .t-rewrite-settings-window,#t-rewrite-settings-overlay .t-set-nav,#t-rewrite-settings-overlay .t-form-group,#t-rewrite-settings-overlay .t-rewrite-settings-footer,#t-lore-settings-dialog .t-lore-settings-window,#t-lore-settings-dialog .t-set-nav,#t-lore-settings-dialog .t-form-group,#t-lore-settings-dialog .t-lore-settings-footer{border-color:${c.border}!important;}`;
+  }
+   if (c.txt) {
+    css += `.t-box,.t-box *:not(.fa-heart):not(#t-output-content *):not(#t-read-content *){color:${c.txt}!important;}.t-title-main,.t-title-sub,.t-window-title{background:none!important;-webkit-text-fill-color:${c.txt}!important;color:${c.txt}!important;text-shadow:none!important;}.t-input::placeholder,textarea::placeholder,input::placeholder{color:${c.txt}!important;opacity:0.5!important;}`;
+  }
+  if (c.theme) {
+    const btnTxt = c.bg || "#ffffff";
+    css += `.t-btn.primary,.t-btn-primary,.t-btn-success,.t-run-single,.t-run-queue.active,.t-hub-primary-action,.t-outline-primary-actions #t-outline-generate,.t-scene-hub-footer #t-scene-hub-send,.t-outline-add-fab,.t-recall-search-btn,.t-recall-btn-primary,#t-rewrite-overlay #t-rewrite-trigger{background:${c.theme}!important;background-color:${c.theme}!important;background-image:none!important;color:${btnTxt}!important;border-color:${c.theme}!important;box-shadow:none!important;}.t-btn.primary *,.t-btn-primary *,.t-run-single *,.t-run-queue.active *,#t-rewrite-overlay #t-rewrite-trigger *{color:${btnTxt}!important;}.t-set-tab-btn.active,.t-mgr-sb-item.active,.t-sel-cat-btn.active,.t-mode-btn.active,.t-mode-tab.active,.t-filter-item.active,.t-queue-mode-btn.active,#t-debug-view .t-prompt-seg-btn.active,#t-debug-view .t-prompt-tool-btn.active,.t-wi-tab-btn.active,.t-editor-tabs .t-btn.active{border-color:${c.theme}!important;color:${c.theme}!important;}.t-title-container::before{background:${c.theme}!important;box-shadow:0 0 8px ${c.theme}!important;}.t-history-toggle.active,.t-wi-entry.selected,.t-wi-book-item.selected,.t-queue-script-item.selected,.t-anim-option.active,.t-lore-entry-item.active,.t-plan-accordion-item.expanded,.t-scene-hub-item.active,.t-opening-card.active{border-color:${c.theme}!important;}input[type="checkbox"],input[type="radio"]{accent-color:${c.theme}!important;}`;
+  }
+  el.textContent += css;
 }
 var init_settingsWindow = __esm({
   "src/ui/settingsWindow.js"() {
