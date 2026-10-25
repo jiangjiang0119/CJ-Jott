@@ -1,9 +1,6 @@
 /**
- * Titania Theater (回声小剧场)
- * Bundled with esbuild
- * 
- * 这是打包后的单文件版本。
- * 源代码请查看：https://github.com/Titania-elf/titania-theater
+ * 池绛夫妇の心动放映室 (CJ-Jott)
+ * 仅供个人自用
  */
 
 var __defProp = Object.defineProperty;
@@ -21,9 +18,9 @@ var extensionName, extensionFolderPath, CURRENT_VERSION, GITHUB_REPO, GITHUB_API
 var init_defaults = __esm({
   "src/config/defaults.js"() {
     extensionName = "Titania_Theater_Echo";
-    extensionFolderPath = `scripts/extensions/third-party/titania-theater`;
-    CURRENT_VERSION = "5.0.7";
-    GITHUB_REPO = "Titania-elf/titania-theater";
+    extensionFolderPath = `scripts/extensions/third-party/CJ-Jott`;
+    CURRENT_VERSION = "1.0.0";
+    GITHUB_REPO = "jiangjiang0119/CJ-Jott";
     GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/manifest.json`;
     GITHUB_CHANGELOG_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/changelog.json`;
     CHANGELOG = {
@@ -12520,7 +12517,7 @@ function detectInteractiveContent(html) {
     reasons
   };
 }
-function buildFullHtmlDocument(content, title = "Titania Echo - \u4E92\u52A8\u573A\u666F") {
+function buildFullHtmlDocument(content, title = "心动放映室 - \u4E92\u52A8\u573A\u666F") {
   const styleMatch = content.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
   const styles = styleMatch ? styleMatch.join("\n") : "";
   const bodyContent = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "").trim();
@@ -12564,7 +12561,7 @@ function escapeHtml(str) {
 }
 function openInNewWindow(html, scriptName = "\u4E92\u52A8\u573A\u666F") {
   console.log("[Titania] openInNewWindow \u88AB\u8C03\u7528\uFF0C\u539F\u59CBHTML\u957F\u5EA6:", html?.length || 0);
-  const fullHtml = buildFullHtmlDocument(html, `${scriptName} - Titania Echo`);
+  const fullHtml = buildFullHtmlDocument(html, `${scriptName} - 心动放映室`);
   console.log("[Titania] \u6784\u5EFA\u540E\u5B8C\u6574HTML\u957F\u5EA6:", fullHtml?.length || 0);
   console.log("[Titania] \u5B8C\u6574HTML\u524D500\u5B57\u7B26:", fullHtml?.substring(0, 500));
   const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
@@ -12590,7 +12587,7 @@ function openInNewWindow(html, scriptName = "\u4E92\u52A8\u573A\u666F") {
 }
 function exportAsHtmlFile(html, scriptName = "\u573A\u666F") {
   console.log("[Titania] exportAsHtmlFile \u88AB\u8C03\u7528\uFF0C\u539F\u59CBHTML\u957F\u5EA6:", html?.length || 0);
-  const fullHtml = buildFullHtmlDocument(html, `${scriptName} - Titania Echo`);
+  const fullHtml = buildFullHtmlDocument(html, `${scriptName} - 心动放映室`);
   console.log("[Titania] \u6784\u5EFA\u540E\u5B8C\u6574HTML\u957F\u5EA6:", fullHtml?.length || 0);
   const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -14850,7 +14847,7 @@ ${html2}`;
 
 });
       const link = document.createElement("a");
-      link.download = `Titania_${(/* @__PURE__ */ new Date()).getTime()}.png`;
+      link.download = `池绛夫妇_${(/* @__PURE__ */ new Date()).getTime()}.png`;
       link.href = dataUrl;
       link.click();
       if (window.toastr) {
@@ -30629,7 +30626,7 @@ function openHistoryListModal() {
             });
 
             const link = document.createElement("a");
-            link.download = `Titania_${item.scriptName || "浮光手记"}_${Date.now()}.png`;
+            link.download = `池绛夫妇_${item.scriptName || "浮光手记"}_${Date.now()}.png`;
             link.href = dataUrl;
             link.click();
             if (window.toastr) toastr.success("高清长图已保存！");
@@ -30955,7 +30952,7 @@ async function openWorldInfoSelector() {
   const allBooks = Array.isArray(allBookNames) ? allBookNames.slice() : [];
   const baseActiveBooks = Array.isArray(activeBookNames) ? activeBookNames.filter((name) => allBooks.includes(name)) : [];
   if (loadWarnings.length > 0 && window.toastr) {
-    toastr.warning(`\u4E16\u754C\u4E66\u6570\u636E\u90E8\u5206\u52A0\u8F7D\u5931\u8D25\uFF1A${loadWarnings.join("\uFF1B")}`, "Titania Echo");
+    toastr.warning(`\u4E16\u754C\u4E66\u6570\u636E\u90E8\u5206\u52A0\u8F7D\u5931\u8D25\uFF1A${loadWarnings.join("\uFF1B")}`, "心动放映室");
   }
   let currentViewMode = "all";
   const getVisibleBooks = () => currentViewMode === "active" ? baseActiveBooks : allBooks;
@@ -33008,7 +33005,7 @@ async function handleGenerate(forceScriptId = null, silent = false, generationOv
   $("#t-btn-like").html('<i class="fa-regular fa-heart"></i>').prop("disabled", false);
   showCancelButton();
   startTimer();
-  if (!silent && window.toastr) toastr.info(`\u{1F680} [${conn.profileName}] \u6B63\u5728\u8FDE\u63A5\u6A21\u578B\u6F14\u7ECE...`, "Titania Echo");
+  if (!silent && window.toastr) toastr.info(`\u{1F680} [${conn.profileName}] \u6B63\u5728\u8FDE\u63A5\u6A21\u578B\u6F14\u7ECE...`, "心动放映室");
   let rawContent = "";
   try {
     diagnostics.phase = "prepare_prompt";
@@ -33438,7 +33435,7 @@ ${processedPrompt}`;
           }
           GlobalState.continuation.retryCount++;
           if (!silent && window.toastr) {
-            toastr.info(`\u{1F504} \u68C0\u6D4B\u5230\u622A\u65AD\uFF0C\u6B63\u5728\u81EA\u52A8\u7EED\u5199 (${currentRetry + 1}/${maxRetries})...`, "Titania Echo");
+            toastr.info(`\u{1F504} \u68C0\u6D4B\u5230\u622A\u65AD\uFF0C\u6B63\u5728\u81EA\u52A8\u7EED\u5199 (${currentRetry + 1}/${maxRetries})...`, "心动放映室");
           }
           const continuationSuccess = await performContinuation(script, ctx, cfg, finalUrl, finalKey, finalModel, autoContinueCfg, silent, useSTConnection, "", "auto", false);
           finishPromptTrace(promptTraceId, continuationSuccess ? "success" : "failed", {
@@ -33449,7 +33446,7 @@ ${processedPrompt}`;
         } else {
           TitaniaLogger.warn("\u5DF2\u8FBE\u5230\u6700\u5927\u7EED\u5199\u6B21\u6570", { maxRetries });
           if (!silent && window.toastr) {
-            toastr.warning(`\u26A0\uFE0F \u5DF2\u5C1D\u8BD5\u7EED\u5199 ${maxRetries} \u6B21\uFF0C\u5185\u5BB9\u53EF\u80FD\u4ECD\u4E0D\u5B8C\u6574`, "Titania Echo");
+            toastr.warning(`\u26A0\uFE0F \u5DF2\u5C1D\u8BD5\u7EED\u5199 ${maxRetries} \u6B21\uFF0C\u5185\u5BB9\u53EF\u80FD\u4ECD\u4E0D\u5B8C\u6574`, "心动放映室");
           }
           if (GlobalState.continuation.accumulatedContent) {
             finalOutput = GlobalState.continuation.accumulatedContent;
@@ -33502,7 +33499,7 @@ ${processedPrompt}`;
     }
     stopTimer();
     const elapsed = GlobalState.lastGenerationTime / 1e3;
-    if (!silent && window.toastr) toastr.success(`\u2728 \u300A${script.name}\u300B\u6F14\u7ECE\u5B8C\u6210\uFF01(${elapsed.toFixed(1)}s)`, "Titania Echo");
+    if (!silent && window.toastr) toastr.success(`\u2728 \u300A${script.name}\u300B\u6F14\u7ECE\u5B8C\u6210\uFF01(${elapsed.toFixed(1)}s)`, "心动放映室");
     $floatBtn.addClass("t-notify");
     finishPromptTrace(promptTraceId, "success", {
       outputLength: finalOutput.length,
@@ -33591,9 +33588,9 @@ ${processedPrompt}`;
     $floatBtn.addClass("t-notify");
     if (!silent && window.toastr) {
       if (partialSaved) {
-        toastr.warning("\u751F\u6210\u4E2D\u65AD\uFF0C\u5DF2\u81EA\u52A8\u4FDD\u5B58\u5DF2\u8FD4\u56DE\u7684\u5185\u5BB9", "Titania Warning");
+        toastr.warning("\u751F\u6210\u4E2D\u65AD\uFF0C\u5DF2\u81EA\u52A8\u4FDD\u5B58\u5DF2\u8FD4\u56DE\u7684\u5185\u5BB9", "放映室提示");
       } else {
-        toastr.error("\u751F\u6210\u5931\u8D25", "Titania Error");
+        toastr.error("\u751F\u6210\u5931\u8D25", "放映室异常");
       }
     }
     finishPromptTrace(promptTraceId, "failed", {
@@ -33955,7 +33952,7 @@ Generate ONLY the continuation (no repetition):`;
             reason: lastError?.message || "unknown"
           });
           if (!silent && window.toastr) {
-            toastr.info("\u{1F501} \u7EED\u5199\u670D\u52A1\u7E41\u5FD9\uFF0C\u5C1D\u8BD5\u975E\u6D41\u5F0F\u6A21\u5F0F...", "Titania Echo");
+            toastr.info("\u{1F501} \u7EED\u5199\u670D\u52A1\u7E41\u5FD9\uFF0C\u5C1D\u8BD5\u975E\u6D41\u5F0F\u6A21\u5F0F...", "心动放映室");
           }
           const fallbackBody = { ...requestBody, stream: false };
           const fallbackRes = await fetch(endpoint, {
@@ -34023,7 +34020,7 @@ Generate ONLY the continuation (no repetition):`;
       );
       GlobalState.continuation.retryCount++;
       if (!silent && window.toastr) {
-        toastr.info(`\u{1F504} \u7EED\u5199\u5185\u5BB9\u4ECD\u88AB\u622A\u65AD\uFF0C\u7EE7\u7EED\u5C1D\u8BD5 (${GlobalState.continuation.retryCount}/${maxRetries})...`, "Titania Echo");
+        toastr.info(`\u{1F504} \u7EED\u5199\u5185\u5BB9\u4ECD\u88AB\u622A\u65AD\uFF0C\u7EE7\u7EED\u5C1D\u8BD5 (${GlobalState.continuation.retryCount}/${maxRetries})...`, "心动放映室");
       }
       finishPromptTrace(promptTraceId, "success", {
         reason: "continuation_retry",
@@ -34081,7 +34078,7 @@ Generate ONLY the continuation (no repetition):`;
       const elapsed = GlobalState.lastGenerationTime / 1e3;
       if (!silent && window.toastr) {
         const successMsg = continuationType === "user" ? `\u2728 \u4E3B\u52A8\u7EED\u5199\u5B8C\u6210\uFF01(${totalRetries}\u6B21\u8865\u7EED\u5199, ${elapsed.toFixed(1)}s)` : `\u2728 \u300A${script.name}\u300B\u6F14\u7ECE\u5B8C\u6210\uFF01(\u542B${totalRetries}\u6B21\u7EED\u5199, ${elapsed.toFixed(1)}s)`;
-        toastr.success(successMsg, "Titania Echo");
+        toastr.success(successMsg, "心动放映室");
       }
       $floatBtn.addClass("t-notify");
       TitaniaLogger.info("\u7EED\u5199\u5B8C\u6210", {
@@ -34115,7 +34112,7 @@ Generate ONLY the continuation (no repetition):`;
         const errorHint = String(e?.message || "");
         const isServerBusy = errorHint.includes("503") || errorHint.includes("429");
         const tip = isServerBusy ? "\u26A0\uFE0F \u7EED\u5199\u5931\u8D25\uFF08\u670D\u52A1\u7E41\u5FD9\uFF09\uFF0C\u5DF2\u4FDD\u7559\u5F53\u524D\u5185\u5BB9\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5" : "\u26A0\uFE0F \u7EED\u5199\u5931\u8D25\uFF0C\u663E\u793A\u5DF2\u83B7\u53D6\u7684\u5185\u5BB9";
-        toastr.warning(tip, "Titania Echo");
+        toastr.warning(tip, "心动放映室");
       }
     }
     resetContinuationState();
@@ -34204,7 +34201,7 @@ ${userInstruction}`;
     unlockDisplay();
   }
   if (window.toastr) {
-    toastr.info(`🔄 已按顺序装载前 ${scenes.length} 篇，正在续写【第 ${nextPartNum} 篇】...`, "Titania Echo");
+    toastr.info(`🔄 已按顺序装载前 ${scenes.length} 篇，正在续写【第 ${nextPartNum} 篇】...`, "心动放映室");
   }
 
   const totalChars = scenesBlock.length;
@@ -34301,7 +34298,7 @@ async function onGenerationEnded() {
   }, 500);
 }
 function initCoreFeatures() {
-  console.log(`Titania Echo v${CURRENT_VERSION}: Core initialized.`);
+  console.log(`心动放映室 v${CURRENT_VERSION}: Core initialized.`);
   const extData = getExtData();
   if ((!extData.config || Object.keys(extData.config).length === 0) && localStorage.getItem(LEGACY_KEYS.CFG)) {
     try {
@@ -34324,7 +34321,7 @@ function initCoreFeatures() {
       }
       if (migrated) {
         saveExtData();
-        if (window.toastr) toastr.success("\u6570\u636E\u5DF2\u8FC1\u79FB\u81F3\u670D\u52A1\u7AEF", "Titania Echo");
+        if (window.toastr) toastr.success("\u6570\u636E\u5DF2\u8FC1\u79FB\u81F3\u670D\u52A1\u7AEF", "心动放映室");
       }
     } catch (e) {
       console.error("Titania: Migration failed", e);
@@ -34480,10 +34477,10 @@ function bindDrawerBackupControls() {
       const filename = `titania_backup_${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10).replace(/-/g, "")}.json`;
       downloadBackupPayload(exportData, filename);
       const stats = countVectorItems(exportData.vectors);
-      if (window.toastr) toastr.success(`\u5907\u4EFD\u5DF2\u5BFC\u51FA\uFF08\u5411\u91CF\u89D2\u8272 ${stats.characters}\uFF0C\u5411\u91CF\u6761\u76EE ${stats.vectors}\uFF09`, "Titania Echo");
+      if (window.toastr) toastr.success(`\u5907\u4EFD\u5DF2\u5BFC\u51FA\uFF08\u5411\u91CF\u89D2\u8272 ${stats.characters}\uFF0C\u5411\u91CF\u6761\u76EE ${stats.vectors}\uFF09`, "心动放映室");
     } catch (e) {
       console.error("Titania: \u5907\u4EFD\u5BFC\u51FA\u5931\u8D25", e);
-      if (window.toastr) toastr.error(e.message || "\u5BFC\u51FA\u5931\u8D25", "Titania Echo");
+      if (window.toastr) toastr.error(e.message || "\u5BFC\u51FA\u5931\u8D25", "心动放映室");
     } finally {
       $btn.prop("disabled", false).html(oldHtml);
     }
@@ -34517,7 +34514,7 @@ function bindDrawerBackupControls() {
         const currentSnapshot = await createFullBackupPayload({ includeVectors: true, autoBackup: true });
         const filename = `titania_auto_backup_${(/* @__PURE__ */ new Date()).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "_")}.json`;
         downloadBackupPayload(currentSnapshot, filename);
-        if (window.toastr) toastr.info("\u5DF2\u81EA\u52A8\u5907\u4EFD\u5F53\u524D\u6570\u636E\uFF0C\u8BF7\u4FDD\u5B58\u4E0B\u8F7D\u7684\u6587\u4EF6", "Titania Echo");
+        if (window.toastr) toastr.info("\u5DF2\u81EA\u52A8\u5907\u4EFD\u5F53\u524D\u6570\u636E\uFF0C\u8BF7\u4FDD\u5B58\u4E0B\u8F7D\u7684\u6587\u4EF6", "心动放映室");
       } catch (backupErr) {
         console.warn("Titania: \u81EA\u52A8\u5907\u4EFD\u5931\u8D25", backupErr);
         if (!confirm("\u26A0\uFE0F \u81EA\u52A8\u5907\u4EFD\u5931\u8D25\uFF01\u662F\u5426\u4ECD\u8981\u7EE7\u7EED\u5BFC\u5165\uFF1F\n\n\u5982\u679C\u7EE7\u7EED\uFF0C\u5F53\u524D\u6570\u636E\u53EF\u80FD\u65E0\u6CD5\u6062\u590D\u3002")) {
@@ -34540,7 +34537,7 @@ function bindDrawerBackupControls() {
       }
       const saveSuccess = await saveExtDataImmediate();
       if (!saveSuccess) throw new Error("\u4FDD\u5B58\u6570\u636E\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5");
-      if (window.toastr) toastr.success(`\u5907\u4EFD\u5DF2\u6062\u590D\uFF08\u5411\u91CF\u6761\u76EE ${importedVectorCount}\uFF09`, "Titania Echo");
+      if (window.toastr) toastr.success(`\u5907\u4EFD\u5DF2\u6062\u590D\uFF08\u5411\u91CF\u6761\u76EE ${importedVectorCount}\uFF09`, "心动放映室");
       setTimeout(() => {
         if (confirm("\u5907\u4EFD\u5DF2\u6062\u590D\u6210\u529F\uFF01\u662F\u5426\u7ACB\u5373\u5237\u65B0\u9875\u9762\uFF1F")) {
           location.reload();
@@ -34548,7 +34545,7 @@ function bindDrawerBackupControls() {
       }, 500);
     } catch (err) {
       console.error("Titania: \u5907\u4EFD\u5BFC\u5165\u5931\u8D25", err);
-      if (window.toastr) toastr.error("\u5BFC\u5165\u5931\u8D25\uFF1A" + (err?.message || String(err)), "Titania Echo");
+      if (window.toastr) toastr.error("\u5BFC\u5165\u5931\u8D25\uFF1A" + (err?.message || String(err)), "心动放映室");
     } finally {
       $(this).val("");
     }
@@ -34610,7 +34607,7 @@ async function loadExtensionSettings() {
     data.outline_entry.enabled = enabled;
     saveExtData();
     refreshOutlineEntryButton();
-    if (window.toastr) toastr.success(enabled ? "\u6545\u4E8B\u5927\u7EB2\u5165\u53E3\u5DF2\u542F\u7528" : "\u6545\u4E8B\u5927\u7EB2\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u6545\u4E8B\u5927\u7EB2\u5165\u53E3\u5DF2\u542F\u7528" : "\u6545\u4E8B\u5927\u7EB2\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   $("#cfg-outline-theater-enabled").on("input", function() {
     const enabled = $(this).prop("checked") === true;
@@ -34621,7 +34618,7 @@ async function loadExtensionSettings() {
     data.outline_entry.show_theater = enabled;
     saveExtData();
     refreshOutlineEntryButton();
-    if (window.toastr) toastr.success(enabled ? "\u56DE\u58F0\u5C0F\u5267\u573A\u5165\u53E3\u5DF2\u542F\u7528" : "\u56DE\u58F0\u5C0F\u5267\u573A\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u56DE\u58F0\u5C0F\u5267\u573A\u5165\u53E3\u5DF2\u542F\u7528" : "\u56DE\u58F0\u5C0F\u5267\u573A\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   $("#cfg-outline-actions-enabled").on("input", function() {
     const enabled = $(this).prop("checked") === true;
@@ -34632,7 +34629,7 @@ async function loadExtensionSettings() {
     data.outline_entry.show_outline_actions = enabled;
     saveExtData();
     refreshOutlineEntryButton();
-    if (window.toastr) toastr.success(enabled ? "\u5927\u7EB2\u751F\u6210\u5165\u53E3\u5DF2\u542F\u7528" : "\u5927\u7EB2\u751F\u6210\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u5927\u7EB2\u751F\u6210\u5165\u53E3\u5DF2\u542F\u7528" : "\u5927\u7EB2\u751F\u6210\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   $("#cfg-rewrite-entry-enabled").on("input", function() {
     const enabled = $(this).prop("checked") === true;
@@ -34641,7 +34638,7 @@ async function loadExtensionSettings() {
     data.rewrite_entry.enabled = enabled;
     saveExtData();
     refreshRewriteEntryButton();
-    if (window.toastr) toastr.success(enabled ? "\u6587\u672C\u6539\u5199\u5165\u53E3\u5DF2\u542F\u7528" : "\u6587\u672C\u6539\u5199\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u6587\u672C\u6539\u5199\u5165\u53E3\u5DF2\u542F\u7528" : "\u6587\u672C\u6539\u5199\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   $("#cfg-toolbar-lore-enabled").on("input", function() {
     const enabled = $(this).prop("checked") === true;
@@ -34652,7 +34649,7 @@ async function loadExtensionSettings() {
     }
     data.quick_toolbar.enabled_items.lore = enabled;
     saveExtData();
-    if (window.toastr) toastr.success(enabled ? "\u63D0\u53D6\u8BBE\u5B9A\u5FEB\u6377\u5165\u53E3\u5DF2\u542F\u7528" : "\u63D0\u53D6\u8BBE\u5B9A\u5FEB\u6377\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u63D0\u53D6\u8BBE\u5B9A\u5FEB\u6377\u5165\u53E3\u5DF2\u542F\u7528" : "\u63D0\u53D6\u8BBE\u5B9A\u5FEB\u6377\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   $("#cfg-toolbar-recall-enabled").on("input", function() {
     const enabled = $(this).prop("checked") === true;
@@ -34663,7 +34660,7 @@ async function loadExtensionSettings() {
     }
     data.quick_toolbar.enabled_items.recall = enabled;
     saveExtData();
-    if (window.toastr) toastr.success(enabled ? "\u8BB0\u5FC6\u53EC\u56DE\u5FEB\u6377\u5165\u53E3\u5DF2\u542F\u7528" : "\u8BB0\u5FC6\u53EC\u56DE\u5FEB\u6377\u5165\u53E3\u5DF2\u5173\u95ED", "Titania Echo");
+    if (window.toastr) toastr.success(enabled ? "\u8BB0\u5FC6\u53EC\u56DE\u5FEB\u6377\u5165\u53E3\u5DF2\u542F\u7528" : "\u8BB0\u5FC6\u53EC\u56DE\u5FEB\u6377\u5165\u53E3\u5DF2\u5173\u95ED", "心动放映室");
   });
   checkVersionUpdate();
   bindDrawerBackupControls();
@@ -34936,7 +34933,7 @@ async function showUpdateConfirmDialog(remoteVersion) {
     $(".titania-update-overlay").remove();
     $("#extensions_details").click();
     if (window.toastr) {
-      toastr.info("\u8BF7\u5728\u6269\u5C55\u7BA1\u7406\u5668\u4E2D\u627E\u5230\u300C\u56DE\u58F0\u5C0F\u5267\u573A\u300D\u5E76\u70B9\u51FB\u66F4\u65B0\u6309\u94AE", "Titania Echo");
+      toastr.info("\u8BF7\u5728\u6269\u5C55\u7BA1\u7406\u5668\u4E2D\u627E\u5230\u300C\u56DE\u58F0\u5C0F\u5267\u573A\u300D\u5E76\u70B9\u51FB\u66F4\u65B0\u6309\u94AE", "心动放映室");
     }
     showRefreshPrompt();
   });
@@ -34953,6 +34950,6 @@ jQuery(async () => {
     $("#extensions_settings2").append(settingsHtml);
     loadExtensionSettings();
   } catch (e) {
-    console.error("Titania Echo: Failed to load settings.html", e);
+    console.error("心动放映室: Failed to load settings.html", e);
   }
 });
