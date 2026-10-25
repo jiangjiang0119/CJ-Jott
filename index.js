@@ -1891,7 +1891,7 @@ textarea.t-input {
 
 /* \u961F\u5217\u6309\u94AE\u672A\u6FC0\u6D3B\u63D0\u793A\u6837\u5F0F */
 .t-run-queue.inactive {
-    background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+    background: linear-gradient(135deg, #E7DDEA, #E7DDEA);
     color: #888;
 }
 
@@ -11464,26 +11464,30 @@ function resetContinuationState() {
   };
 }
 function pushSceneToHistory(content, scriptId, scriptName) {
-  const history = GlobalState.sceneHistory;
+  let extD;
+  try { extD = getExtData(); } catch(e) { extD = {}; }
+  if (!Array.isArray(extD.scene_history)) extD.scene_history = [];
+  
+  GlobalState.sceneHistory.items = extD.scene_history;
+  
+  const maxLimit = parseInt(extD.queue_config?.historyMax) || 1000;
   const newItem = {
     content,
     scriptId,
-    scriptName: scriptName || "\u672A\u77E5\u5267\u672C",
+    scriptName: scriptName || "\u573A\u666F",
     timestamp: Date.now(),
     isRead: false,
-    // 新生成的默认未读
     favId: null
-    // 该记录对应的收藏 ID（null 表示未收藏）
   };
-  history.items.unshift(newItem);
-  while (history.items.length > history.maxItems) {
-    history.items.pop();
-  }
-  history.currentIndex = 0;
+
+  extD.scene_history.unshift(newItem);
+  while (extD.scene_history.length > maxLimit) extD.scene_history.pop();
+  try { saveExtData(); } catch(e) {}
+
+  GlobalState.sceneHistory.currentIndex = 0;
   GlobalState.lastGeneratedContent = content;
   GlobalState.lastGeneratedScriptId = scriptId;
   GlobalState.lastFavId = null;
-  console.log(`[Titania] \u5267\u573A\u5386\u53F2\u5DF2\u66F4\u65B0: ${history.items.length} \u6761\u8BB0\u5F55`);
 }
 function getCurrentHistoryItem() {
   const history = GlobalState.sceneHistory;
@@ -11773,29 +11777,41 @@ var DEFAULT_PRESETS;
 var init_presets = __esm({
   "src/config/presets.js"() {
     DEFAULT_PRESETS = [
-      // === 建议开启「读取聊天历史」的剧本 ===
-      { id: "e_mind", name: "\u{1F50D} \u6B64\u523B\u5FC3\u58F0", category: "\u5FC3\u7406\u5206\u6790", desc: "\u89E3\u6790\u89D2\u8272\u5728\u521A\u521A\u5BF9\u8BDD\u7ED3\u675F\u540E\u7684\u771F\u5B9E\u5FC3\u7406\u6D3B\u52A8\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u8BF7\u6839\u636E\u4E0A\u6587\u7684\u5BF9\u8BDD\u8BB0\u5F55\uFF0C\u5206\u6790 {{char}} \u6B64\u523B\u672A\u8BF4\u51FA\u53E3\u7684\u771F\u5B9E\u60F3\u6CD5\u3002CSS\u6837\u5F0F\uFF1A\u6DF1\u84DD\u8272\u534A\u900F\u660E\u80CC\u666F\uFF0C\u767D\u8272\u5B57\u4F53\uFF0C\u6A21\u62DFHUD\u62AC\u5934\u663E\u793A\u5668\u6548\u679C\uFF0C\u5E26\u6709\u95EA\u70C1\u7684\u5149\u6807\u3002\u5185\u5BB9\u683C\u5F0F\uFF1A[\u8868\u9762\u6001\u5EA6] vs [\u5185\u5FC3\u72EC\u767D]\u3002" },
-      { id: "e_diary", name: "\u{1F4D4} \u79C1\u5BC6\u65E5\u8BB0", category: "\u5FC3\u7406\u5206\u6790", desc: "\u89D2\u8272\u5728\u4ECA\u5929\u7ED3\u675F\u540E\u5199\u4E0B\u7684\u4E00\u7BC7\u65E5\u8BB0\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u57FA\u4E8E\u521A\u624D\u53D1\u751F\u7684\u4E8B\u4EF6\uFF0C\u5199\u4E00\u7BC7 {{char}} \u7684\u65E5\u8BB0\u3002CSS\u6837\u5F0F\uFF1A\u7F8A\u76AE\u7EB8\u7EB9\u7406\u80CC\u666F\uFF0C\u624B\u5199\u4F53\uFF0C\u6DF1\u8910\u8272\u58A8\u6C34\u6548\u679C\uFF0C\u7EB8\u5F20\u8FB9\u7F18\u5E26\u6709\u505A\u65E7\u611F\u3002\u5185\u5BB9\u91CD\u70B9\uFF1A\u89D2\u8272\u5982\u4F55\u770B\u5F85\u4E0E {{user}} \u7684\u6700\u65B0\u4E92\u52A8\uFF0C\u4EE5\u53CA\u60C5\u611F\u6CE2\u52A8\u3002" },
-      { id: "e_qidian", name: "\u{1F4D6} \u8D77\u70B9\u4E66\u8BC4", category: "\u8DA3\u5473\u5410\u69FD", desc: "\u5982\u679C\u4F60\u4EEC\u7684\u6545\u4E8B\u662F\u4E00\u672C\u8FDE\u8F7D\u7F51\u6587\uFF0C\u8BFB\u8005\u7684\u7280\u5229\u70B9\u8BC4\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u5047\u8BBE {{char}} \u548C {{user}} \u662F\u67D0\u672C\u70ED\u95E8\u8FDE\u8F7D\u7F51\u6587\u7684\u4E3B\u89D2\u3002\u8BF7\u751F\u6210\u4E00\u6BB5\u4E66\u8BC4\u533A\uFF08\u7AE0\u8BF4\uFF09\u7684\u5185\u5BB9\u3002\u5305\u62EC\uFF1A\u50AC\u66F4\u3001\u5BF9\u521A\u624D\u5267\u60C5\u7684\u5410\u69FD\u3001\u78D5CP\u7684\u8A00\u8BBA\u3001\u4EE5\u53CA\u5BF9\u89D2\u8272\u667A\u5546\u7684\u5206\u6790\u3002CSS\u6837\u5F0F\uFF1A\u6D45\u7070\u8272\u80CC\u666F\uFF0C\u6DF1\u8272\u6587\u5B57\uFF0C\u6A21\u4EFF\u624B\u673A\u9605\u8BFBAPP\u7684\u8BC4\u8BBA\u533A\u5E03\u5C40\uFF0C\u5E26\u6709'\u70ED\u8BC4'\u3001'\u70B9\u8D5E\u6570'\u7B49\u5143\u7D20\u3002" },
-      { id: "e_danmu", name: "\u{1F4FA} \u5410\u69FD\u5F39\u5E55", category: "\u8DA3\u5473\u5410\u69FD", desc: "\u9AD8\u80FD\u9884\u8B66\uFF01\u521A\u624D\u7684\u5267\u60C5\u5982\u679C\u901A\u8FC7\u76F4\u64AD\u64AD\u51FA\u4F1A\u600E\u6837\uFF1F(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u5C06\u521A\u624D\u7684\u4E92\u52A8\u89C6\u4E3A\u4E00\u573A\u76F4\u64AD\u6216\u756A\u5267\u66F4\u65B0\u3002\u8BF7\u751F\u6210\u98D8\u8FC7\u7684\u5F39\u5E55\u5185\u5BB9\u3002\u5185\u5BB9\u98CE\u683C\uFF1A\u73A9\u6897\u3001'\u524D\u65B9\u9AD8\u80FD'\u3001'AWSL'\u3001'\u6025\u6B7B\u6211\u4E86'\u3001\u5BF9 {{char}} \u7684\u5FAE\u8868\u60C5\u8FDB\u884C\u9010\u5E27\u5206\u6790\u3002CSS\u6837\u5F0F\uFF1A\u534A\u900F\u660E\u9ED1\u8272\u906E\u7F69\u80CC\u666F\uFF0C\u5F69\u8272\u6EDA\u52A8\u5B57\u4F53\uFF08\u6A21\u62DF\u89C6\u9891\u5F39\u5E55\u5C42\uFF09\uFF0C\u5B57\u4F53\u5927\u5C0F\u4E0D\u4E00\uFF0C\u8425\u9020\u70ED\u95D8\u611F\u3002" },
-      { id: "e_forum", name: "\u{1F4AC} \u533F\u540D\u6811\u6D1E", category: "\u8DA3\u5473\u5410\u69FD", desc: "\u89D2\u8272\uFF08\u6216\u8DEF\u4EBA\uFF09\u5728\u533F\u540D\u8BBA\u575B\u53D1\u7684\u6C42\u52A9/\u5410\u69FD\u8D34\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u8BF7\u6A21\u62DF {{char}} (\u6216\u8005\u88AB\u5377\u5165\u7684\u8DEF\u4EBA) \u5728\u533F\u540D\u8BBA\u575B(\u5982Reddit\u6216NGA)\u53D1\u5E03\u7684\u4E00\u4E2A\u5E16\u5B50\u3002\u6807\u9898\u8981\u9707\u60CA\uFF0C\u5185\u5BB9\u662F\u5173\u4E8E\u521A\u624D\u53D1\u751F\u7684\u4E8B\u4EF6\u3002CSS\u6837\u5F0F\uFF1A\u6A21\u4EFF\u8BBA\u575B\u7F51\u9875\u98CE\u683C\uFF0C\u5E26\u6709'\u697C\u4E3B'\u6807\u8BC6\uFF0C\u5F15\u7528\u56DE\u590D\u6846\uFF0C\u80CC\u666F\u8272\u4E3A\u62A4\u773C\u7C73\u8272\u6216\u6697\u8272\u6A21\u5F0F\u3002" },
-      { id: "e_bloopers", name: "\u{1F3AC} \u7535\u5F71\u82B1\u7D6E", category: "\u8DA3\u5473\u5410\u69FD", desc: "'\u5361\uFF01' \u521A\u624D\u90A3\u6BB5\u5176\u5B9E\u662F\u62CD\u620F\uFF1F\u6765\u770B\u770BNG\u955C\u5934\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u5047\u8BBE\u521A\u624D\u7684\u5267\u60C5\u662F\u5728\u62CD\u620F\u3002\u8BF7\u64B0\u5199\u4E00\u6BB5'\u5E55\u540E\u82B1\u7D6E'\u3002\u4F8B\u5982\uFF1A{{char}} \u5FD8\u8BCD\u4E86\u3001\u7B11\u573A\u4E86\u3001\u9053\u5177\u574F\u4E86\uFF0C\u6216\u8005\u5BFC\u6F14\u558A\u5361\u540E {{char}} \u77AC\u95F4\u51FA\u620F\u5BF9 {{user}} \u8BF4\u4E86\u4EC0\u4E48\u3002CSS\u6837\u5F0F\uFF1A\u80F6\u5377\u5E95\u7247\u98CE\u683C\u8FB9\u6846\uFF0C\u9ED1\u767D\u6216\u590D\u53E4\u6EE4\u955C\u80CC\u666F\uFF0C\u6253\u5B57\u673A\u5B57\u4F53\u3002" },
-      { id: "e_system", name: "\u{1F4DF} \u7CFB\u7EDF\u62A5\u544A", category: "\u5FC3\u7406\u5206\u6790", desc: "Galgame\u98CE\u683C\u7684\u597D\u611F\u5EA6\u4E0E\u72B6\u6001\u7ED3\u7B97\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u8BF7\u4EE5\u604B\u7231\u517B\u6210\u6E38\u620F\uFF08\u6216RPG\u7CFB\u7EDF\uFF09\u7684\u89C6\u89D2\uFF0C\u751F\u6210\u4E00\u4EFD'\u4E8B\u4EF6\u7ED3\u7B97\u62A5\u544A'\u3002\u5185\u5BB9\u5305\u62EC\uFF1A{{char}} \u7684\u597D\u611F\u5EA6\u53D8\u5316\u6570\u503C\uFF08+/-\uFF09\u3001\u5FC3\u60C5\u6307\u6570\u3001San\u503C\u6CE2\u52A8\u3001\u4EE5\u53CA\u7CFB\u7EDF\u5BF9 {{user}} \u4E0B\u4E00\u6B65\u64CD\u4F5C\u7684\u63D0\u793A\u3002CSS\u6837\u5F0F\uFF1A\u8D5B\u535A\u79D1\u5E7B\u60AC\u6D6E\u7A97\uFF0C\u534A\u900F\u660E\u73BB\u7483\u62DF\u6001\uFF0C\u9713\u8679\u8272\u8FDB\u5EA6\u6761\u3002" },
-      { id: "e_drunk", name: "\u{1F37A} \u9152\u540E\u771F\u8A00", category: "\u5FC3\u7406\u5206\u6790", desc: "\u89D2\u8272\u559D\u9189\u540E\uFF0C\u8DDF\u9152\u4FDD\u5410\u69FD\u8FD9\u4E00\u8FDE\u4E32\u7684\u4E8B\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u573A\u666F\uFF1A{{char}} \u6B63\u5728\u9152\u5427\u4E70\u9189\u3002\u8BF7\u64B0\u5199\u4E00\u6BB5\u4ED6/\u5979\u5BF9\u9152\u4FDD\u7684\u5410\u69FD\uFF0C\u5185\u5BB9\u5168\u662F\u5173\u4E8E {{user}} \u7684\uFF0C\u5145\u6EE1\u4E86\u6094\u6068\u3001\u8FF7\u604B\u6216\u62B1\u6028\u3002CSS\u6837\u5F0F\uFF1A\u660F\u6697\u7684\u9152\u5427\u6C1B\u56F4\uFF0C\u6587\u5B57\u5E26\u6709\u6A21\u7CCA\u91CD\u5F71\u6548\u679C\uFF08\u6A21\u62DF\u9189\u9152\u89C6\u89C9\uFF09\u3002" },
-      { id: "e_wechat", name: "\u{1F4F1} \u670B\u53CB\u5708/\u63A8\u7279", category: "\u8DA3\u5473\u5410\u69FD", desc: "\u4EC5\u5BF9\u65B9\u53EF\u89C1\uFF08\u6216\u5FD8\u8BB0\u5C4F\u853D\uFF09\u7684\u793E\u4EA4\u52A8\u6001\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u57FA\u4E8E\u521A\u624D\u7684\u5267\u60C5\uFF0C{{char}} \u53D1\u4E86\u4E00\u6761\u793E\u4EA4\u5A92\u4F53\u52A8\u6001\uFF08\u670B\u53CB\u5708/Twitter\uFF09\u3002\u5185\u5BB9\u53EF\u80FD\u662F\u4E00\u5F20\u914D\u56FE\u7684\u6587\u5B57\uFF08\u7528\u6587\u5B57\u63CF\u8FF0\u56FE\u7247\uFF09\uFF0C\u6216\u8005\u4E00\u53E5\u542B\u6C99\u5C04\u5F71\u7684\u8BDD\u3002CSS\u6837\u5F0F\uFF1A\u6A21\u4EFF\u624B\u673AAPP\u754C\u9762\uFF0C\u5E26\u6709\u5934\u50CF\u3001\u65F6\u95F4\u6233\u3001\u70B9\u8D5E\u548C\u8BC4\u8BBA\u6309\u94AE\u3002" },
-      { id: "e_dream", name: "\u{1F319} \u5348\u591C\u68A6\u56DE", category: "\u5FC3\u7406\u5206\u6790", desc: "\u5F53\u665A\u89D2\u8272\u505A\u7684\u68A6\uFF0C\u6620\u5C04\u4E86\u767D\u5929\u7684\u7ECF\u5386\u3002(\u5EFA\u8BAE\u5F00\u542F\u5386\u53F2)", prompt: "\u591C\u6DF1\u4E86\uFF0C{{char}} \u5165\u7761\u540E\u505A\u4E86\u4E00\u4E2A\u68A6\u3002\u68A6\u5883\u5185\u5BB9\u662F\u767D\u5929\u4E8B\u4EF6\u7684\u626D\u66F2\u3001\u5938\u5F20\u6216\u6F5C\u610F\u8BC6\u6298\u5C04\u3002\u98CE\u683C\u8981\u8FF7\u5E7B\u3001\u8C61\u5F81\u4E3B\u4E49\u3002CSS\u6837\u5F0F\uFF1A\u6DF1\u7D2B\u8272\u661F\u7A7A\u80CC\u666F\uFF0C\u6726\u80E7\u7684\u767D\u8272\u5149\u6655\u6587\u5B57\uFF0C\u8425\u9020\u68A6\u5E7B\u611F\u3002" },
-      // === 平行世界风格剧本（无需聊天历史） ===
-      { id: "p_school", name: "\u{1F3EB} \u9752\u6625\u6821\u56ED", category: "\u5E73\u884C\u4E16\u754C", desc: "\u73B0\u4EE3\u9AD8\u4E2DPA\u3002\u540C\u684C\u3001\u4F20\u7EB8\u6761\u3001\u5348\u540E\u7684\u64CD\u573A\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u73B0\u4EE3\u9AD8\u4E2D\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u73ED\u91CC\u7684\u4F18\u7B49\u751F\u6216\u4E0D\u826F\u5C11\u5E74\uFF0C{{user}} \u662F\u540C\u684C\u3002\u63CF\u5199\u4E00\u6BB5\u4E0A\u8BFE\u6084\u6084\u4E92\u52A8\u6216\u653E\u5B66\u540E\u7684\u573A\u666F\u3002CSS\u6837\u5F0F\uFF1A\u4F5C\u4E1A\u672C\u6A2A\u7EBF\u7EB8\u80CC\u666F\uFF0C\u5706\u73E0\u7B14\u624B\u5199\u5B57\uFF0C\u6E05\u65B0\u6821\u56ED\u98CE\u3002" },
-      { id: "p_fantasy", name: "\u2694\uFE0F \u897F\u5E7B\u53F2\u8BD7", category: "\u5E73\u884C\u4E16\u754C", desc: "\u5251\u4E0E\u9B54\u6CD5\u3002\u5192\u9669\u8005\u516C\u4F1A\u3001\u7BDD\u706B\u4E0E\u5730\u4E0B\u57CE\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1AD&D\u897F\u5E7B\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u7CBE\u7075/\u9A91\u58EB/\u6CD5\u5E08\uFF0C{{user}} \u662F\u961F\u53CB\u3002\u63CF\u5199\u4E00\u6BB5\u521A\u653B\u7565\u5B8C\u5730\u4E0B\u57CE\u540E\uFF0C\u5728\u7BDD\u706B\u65C1\u4F11\u606F\u64E6\u62ED\u6B66\u5668\u7684\u6E29\u99A8\uFF08\u6216\u66A7\u6627\uFF09\u7247\u6BB5\u3002CSS\u6837\u5F0F\uFF1A\u7C97\u7CD9\u77F3\u7816\u80CC\u666F\uFF0C\u706B\u5149\u8272\u6587\u5B57\uFF0C\u7F8A\u76AE\u5377\u8F74\u8FB9\u6846\u3002" },
-      { id: "p_cyber", name: "\u{1F916} \u8D5B\u535A\u670B\u514B", category: "\u5E73\u884C\u4E16\u754C", desc: "\u591C\u4E4B\u57CE\u3002\u4E49\u4F53\u533B\u751F\u3001\u9ED1\u5BA2\u4E0E\u9713\u8679\u96E8\u591C\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u8D5B\u535A\u670B\u514B2077\u98CE\u683C\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002\u573A\u666F\u662F\u4E0B\u7740\u9178\u96E8\u7684\u9713\u8679\u90FD\u5E02\u3002{{char}} \u6B63\u5728\u4E3A {{user}} \u7EF4\u4FEE\u6545\u969C\u7684\u4E49\u4F53\uFF0C\u6216\u8005\u8FDB\u884C\u975E\u6CD5\u7684\u82AF\u7247\u4EA4\u6613\u3002CSS\u6837\u5F0F\uFF1A\u6545\u969C\u827A\u672F(Glitch)\u98CE\u683C\uFF0C\u9ED1\u5E95\u7EFF\u5B57\uFF0C\u5E26\u6709\u968F\u673A\u7684\u6570\u636E\u4E71\u7801\u88C5\u9970\u3002" },
-      { id: "p_xianxia", name: "\u{1F3D4}\uFE0F \u4ED9\u4FA0\u4FEE\u771F", category: "\u5E73\u884C\u4E16\u754C", desc: "\u5E08\u5C0A\u4E0E\u5F92\u5F1F\uFF0C\u6216\u8005\u6B63\u90AA\u4E0D\u4E24\u7ACB\u7684\u4FEE\u4ED9\u754C\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u53E4\u98CE\u4FEE\u4ED9\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u9AD8\u51B7\u7684\u5E08\u5C0A\u6216\u9B54\u6559\u6559\u4E3B\uFF0C{{user}} \u662F\u5F1F\u5B50\u6216\u6B63\u9053\u5C11\u4FA0\u3002\u63CF\u5199\u4E00\u6BB5\u5728\u6D1E\u5E9C\u4FEE\u70BC\u3001\u4F20\u529F\u6216\u5BF9\u5CD9\u7684\u573A\u666F\u3002CSS\u6837\u5F0F\uFF1A\u6C34\u58A8\u5C71\u6C34\u753B\u80CC\u666F\uFF0C\u5178\u96C5\u53E4\u98CE\u8FB9\u6846\u3002" },
-      { id: "p_office", name: "\u{1F4BC} \u804C\u573A\u7CBE\u82F1", category: "\u5E73\u884C\u4E16\u754C", desc: "\u9738\u603B\u3001\u79D8\u4E66\u6216\u52A0\u73ED\u7684\u540C\u4E8B\u3002\u8336\u6C34\u95F4\u7684\u6545\u4E8B\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u73B0\u4EE3\u804C\u573A\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u4E25\u5389\u7684\u4E0A\u53F8\u6216\u75B2\u60EB\u7684\u524D\u8F88\u3002\u63CF\u5199\u4E00\u6BB5\u5728\u8336\u6C34\u95F4\u5076\u9047\uFF0C\u6216\u8005\u6DF1\u591C\u5728\u529E\u516C\u5BA4\u52A0\u73ED\u5403\u5916\u5356\u7684\u573A\u666F\u3002CSS\u6837\u5F0F\uFF1A\u7B80\u7EA6\u5546\u52A1\u98CE\uFF0C\u767D\u5E95\u9ED1\u5B57\uFF0C\u6A21\u4EFFEmail\u6216\u529E\u516C\u8F6F\u4EF6\u754C\u9762\u3002" },
-      { id: "p_detective", name: "\u{1F575}\uFE0F \u9ED1\u8272\u4FA6\u63A2", category: "\u5E73\u884C\u4E16\u754C", desc: "\u4E0A\u4E16\u7EAA40\u5E74\u4EE3\uFF0C\u7235\u58EB\u4E50\u3001\u96E8\u591C\u4E0E\u79C1\u5BB6\u4FA6\u63A2\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u9ED1\u8272\u7535\u5F71Noir\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u843D\u9B44\u4FA6\u63A2\u6216\u81F4\u547D\u4F34\u4FA3\u3002\u573A\u666F\u662F\u70DF\u96FE\u7F2D\u7ED5\u7684\u4E8B\u52A1\u6240\uFF0C\u7A97\u5916\u4E0B\u7740\u5927\u96E8\u3002\u7528\u7B2C\u4E00\u4EBA\u79F0\u72EC\u767D\u98CE\u683C\u63CF\u5199\u3002CSS\u6837\u5F0F\uFF1A\u9ED1\u767D\u7535\u5F71\u6EE4\u955C\uFF0C\u6253\u5B57\u673A\u5B57\u4F53\uFF0C\u8001\u7167\u7247\u8D28\u611F\u3002" },
-      { id: "p_harry", name: "\u{1FA84} \u9B54\u6CD5\u5B66\u9662", category: "\u5E73\u884C\u4E16\u754C", desc: "\u5206\u9662\u5E3D\u3001\u9B54\u836F\u8BFE\u4E0E\u9B41\u5730\u5947\u6BD4\u8D5B\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u9B54\u6CD5\u5B66\u9662\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u548C {{user}} \u7A7F\u7740\u4E0D\u540C\u5B66\u9662\u7684\u5DEB\u5E08\u888D\u3002\u63CF\u5199\u4E00\u6BB5\u5728\u56FE\u4E66\u9986\u7981\u4E66\u533A\u591C\u6E38\uFF0C\u6216\u8005\u9B54\u836F\u8BFE\u70B8\u4E86\u5769\u57DA\u540E\u7684\u573A\u666F\u3002CSS\u6837\u5F0F\uFF1A\u6DF1\u7EA2\u8272\u6216\u6DF1\u7EFF\u8272\u5929\u9E45\u7ED2\u8D28\u611F\u80CC\u666F\uFF0C\u91D1\u8272\u886C\u7EBF\u5B57\u4F53\uFF0C\u9B54\u6CD5\u706B\u82B1\u88C5\u9970\u3002" },
-      { id: "p_apocalypse", name: "\u{1F9DF} \u672B\u65E5\u751F\u5B58", category: "\u5E73\u884C\u4E16\u754C", desc: "\u4E27\u5C38\u7206\u53D1\u6216\u5E9F\u571F\u4E16\u754C\u3002\u8D44\u6E90\u532E\u4E4F\u4E0B\u7684\u4FE1\u4EFB\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u672B\u65E5\u5E9F\u571F\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002\u4E16\u754C\u5DF2\u6BC1\u706D\uFF0C\u8D44\u6E90\u532E\u4E4F\u3002{{char}} \u548C {{user}} \u8EB2\u5728\u4E00\u5904\u5E9F\u589F\u4E2D\u907F\u96E8\u6216\u8EB2\u907F\u602A\u7269\u3002\u63CF\u5199\u5206\u4EAB\u4EC5\u5B58\u7684\u4E00\u7F50\u7F50\u5934\u65F6\u7684\u5BF9\u8BDD\u3002CSS\u6837\u5F0F\uFF1A\u751F\u9508\u91D1\u5C5E\u7EB9\u7406\u80CC\u666F\uFF0C\u88C2\u75D5\u6548\u679C\uFF0C\u6C61\u6E0D\u6591\u70B9\u3002" },
-      { id: "p_royal", name: "\u{1F451} \u5BAB\u5EF7\u6743\u8C0B", category: "\u5E73\u884C\u4E16\u754C", desc: "\u7687\u5E1D/\u5973\u738B\u4E0E\u6743\u81E3/\u523A\u5BA2\u3002\u534E\u4E3D\u7B3C\u5B50\u91CC\u7684\u535A\u5F08\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u4E2D\u4E16\u7EAA/\u53E4\u4EE3\u5BAB\u5EF7\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u3002{{char}} \u662F\u638C\u63E1\u6743\u529B\u7684\u7687\u5BA4\u6210\u5458\uFF0C{{user}} \u662F\u4F8D\u536B\u6216\u653F\u6CBB\u8054\u59FB\u5BF9\u8C61\u3002\u63CF\u5199\u4E00\u6BB5\u5728\u5BDD\u5BAB\u5185\u4F4E\u58F0\u5BC6\u8C0B\u6216\u5BF9\u5CD9\u7684\u573A\u666F\uFF0C\u5F20\u529B\u62C9\u6EE1\u3002CSS\u6837\u5F0F\uFF1A\u6DF1\u7D2B\u8272\u4E1D\u7EF8\u80CC\u666F\uFF0C\u91D1\u8272\u8FB9\u6846\uFF0C\u534E\u4E3D\u7684\u82B1\u7EB9\u88C5\u9970\u3002" },
-      { id: "p_cthulhu", name: "\u{1F419} \u514B\u82CF\u9C81", category: "\u5E73\u884C\u4E16\u754C", desc: "\u4E0D\u53EF\u540D\u72B6\u7684\u6050\u6016\uFF0C\u6389San\u503C\u7684\u8C03\u67E5\u5458\u6545\u4E8B\u3002", prompt: "\u3010\u5E73\u884C\u4E16\u754C\uFF1A\u514B\u82CF\u9C81\u795E\u8BDD\u3011\u5FFD\u7565\u5386\u53F2\u80CC\u666F\u30021920\u5E74\u4EE3\uFF0C{{char}} \u548C {{user}} \u662F\u8C03\u67E5\u5458\u3002\u4F60\u4EEC\u53D1\u73B0\u4E86\u4E00\u672C\u53E4\u602A\u7684\u4E66\u6216\u4E00\u4E2A\u8BE1\u5F02\u7684\u796D\u575B\u3002{{char}} \u7684\u7406\u667A\u503C\uFF08Sanity\uFF09\u5F00\u59CB\u4E0B\u964D\uFF0C\u8BF4\u8BDD\u53D8\u5F97\u766B\u72C2\u3002CSS\u6837\u5F0F\uFF1A\u6697\u7EFF\u8272\u7C98\u6DB2\u8D28\u611F\u80CC\u666F\uFF0C\u626D\u66F2\u7684\u5B57\u4F53\uFF0C\u6587\u5B57\u5468\u56F4\u5E26\u6709\u6A21\u7CCA\u7684\u9ED1\u96FE\u6548\u679C\u3002" }
-    ];
+  { id: "e_mind", name: "🔍 此刻心声", category: "心理分析", desc: "解析角色对话后的真实心理活动。(建议开启历史)", prompt: "根据上文对话分析 {{char}} 此刻未说出口的真实想法。CSS样式：清透浅色毛玻璃卡片(rgba白底)，内嵌细白框与蓝紫(#8A95F0)呼吸光点，深色清晰字体。格式：[表面态度] vs [内心独白]。" },
+  { id: "e_diary", name: "📔 私密日记", category: "心理分析", desc: "角色在今天结束后写下的私密日记。(建议开启历史)", prompt: "基于刚才的事件写一篇 {{char}} 的日记。CSS样式：半透明柔白信笺毛玻璃背景，深色手写风字体，带玫瑰粉(#DDA0B0)书签点缀。重点：如何看待与 {{user}} 的互动及情感波动。" },
+  { id: "e_qidian", name: "📖 起点书评", category: "趣味吐槽", desc: "如果你们的故事是连载网文，读者的犀利点评。(建议开启历史)", prompt: "假设 {{char}} 和 {{user}} 是热门网文主角，生成一段书评区（章说）内容：含催更、剧情吐槽、磕CP言论。CSS样式：清透浅色磨砂卡片，深色文字，带浅粉点赞标签。" },
+  { id: "e_danmu", name: "📺 吐槽弹幕", category: "趣味吐槽", desc: "刚才的剧情如果直播播出会飘过什么弹幕？(建议开启历史)", prompt: "将刚才的互动视为番剧更新，生成飘过的弹幕（玩梗、AWSL、微表情分析）。CSS样式：通透浅色玻璃面板，低饱和浅蓝紫与玫瑰粉半透明气泡弹幕，深色清晰文字。" },
+  { id: "e_forum", name: "💬 匿名树洞", category: "趣味吐槽", desc: "角色（或路人）在匿名论坛发的求助/吐槽贴。(建议开启历史)", prompt: "模拟 {{char}} 或路人在匿名论坛发布的帖子，标题震惊，内容关于刚才的事件。CSS样式：清透浅色论坛卡片，带柔粉'楼主'标识与半透明白底引用回复框。" },
+  { id: "e_bloopers", name: "🎬 电影花絮", category: "趣味吐槽", desc: "'卡！' 刚才那段其实是拍戏？来看看NG镜头。(建议开启历史)", prompt: "假设刚才的剧情是在拍戏，撰写一段幕后NG花絮（如 {{char}} 忘词、笑场或喊卡后对 {{user}} 说的话）。CSS样式：清透拍立得相框风，柔白半透明底色配深色文字。" },
+  { id: "e_system", name: "📟 系统报告", category: "心理分析", desc: "恋爱养成风的好感度与心动结算。(建议开启历史)", prompt: "以恋爱养成系统视角生成'事件结算报告'：含 {{char}} 好感度变化、心情指数、心动值波动及下一步提示。CSS样式：清透浅色毛玻璃悬浮窗，蓝紫(#8A95F0)到玫瑰粉(#DDA0B0)渐变进度条。" },
+  { id: "e_drunk", name: "🍺 酒后真言", category: "心理分析", desc: "角色微醺后吐露的心声与抱怨。(建议开启历史)", prompt: "场景：{{char}} 微醺后吐露心声，内容全是关于 {{user}} 的迷恋、懊悔或占有欲。CSS样式：柔粉透白毛玻璃卡片，带轻柔微醺气泡点缀与深色文字。" },
+  { id: "e_wechat", name: "📱 朋友圈/动态", category: "趣味吐槽", desc: "仅对方可见（或忘记屏蔽）的社交动态。(建议开启历史)", prompt: "基于刚才的剧情，{{char}} 发了一条朋友圈/社交动态（含配图描述与暗戳戳的文案）。CSS样式：清爽半透明浅色社交卡片，带头像、时间戳与红心点赞栏。" },
+  { id: "e_dream", name: "🌙 午夜梦回", category: "心理分析", desc: "当晚角色做的梦，映射白天的潜意识。(建议开启历史)", prompt: "夜深了，{{char}} 入睡后做了一个映射白天经历的梦境，风格迷幻唯美。CSS样式：清透淡紫(#8A95F0)与柔白渐变毛玻璃背景，深色字体配星光细框。" },
+  { id: "s_phone", name: "📲 偷看TA的手机", category: "赛博查岗", desc: "趁TA不注意解锁手机！备忘录、专属备注与相册。(建议开启历史)", prompt: "趁 {{char}} 不注意，{{user}} 解锁了TA的手机。请展示：1.【置顶聊天】给 {{user}} 的专属备注与未发送草稿；2.【私密备忘录】关于 {{user}} 的小习惯；3.【加密相册】最新照片描述；4.【正在播放】的歌。CSS样式：清透浅色毛玻璃手机UI卡片。" },
+  { id: "s_search", name: "🌐 羞耻搜索记录", category: "赛博查岗", desc: "扒一扒TA深夜偷偷搜索的奇怪问题！(建议开启历史)", prompt: "展示 {{char}} 最近三天的浏览器搜索记录（带时间）及点开看最久的一条问答。搜索词要体现TA表面稳重、背地里因 {{user}} 心动慌乱的反差。CSS样式：清透浅色搜索框与玻璃卡片列表。" },
+  { id: "s_cart", name: "🛒 秘密购物车", category: "赛博查岗", desc: "TA偷偷加购了什么？还有跟客服的对话！(建议开启历史)", prompt: "展示 {{char}} 的购物车清单（3-4件暗藏对 {{user}} 小心思的商品）及匿名咨询客服的聊天记录。CSS样式：清透浅色购物卡片与柔粉聊天气泡。" },
+  { id: "r_jealous", name: "🍋 打翻醋坛子", category: "暧昧升温", desc: "当别人对你献殷勤时，TA的醋意监测报告！(建议开启历史)", prompt: "有路人向 {{user}} 示好，{{char}} 在旁目睹。生成【醋意监测面板】：含酸度进度条、表面冷淡言行、暗地里的小动作、内心占有欲弹幕及事后算账计划。CSS样式：清透毛玻璃卡片配浅色进度条。" },
+  { id: "r_morning", name: "☀️ 清晨第一眼", category: "暧昧升温", desc: "同床共枕的清晨，TA比你早醒半小时偷偷做的事。", prompt: "清晨阳光洒进房间，{{user}} 还在熟睡，{{char}} 已醒了半小时。细腻描写 {{char}} 注视 {{user}} 睡颜的眼神、克制温柔的小动作与爱意。CSS样式：晨光透白毛玻璃信笺，带发光内侧细白框。" },
+  { id: "r_letter", name: "💌 未寄出的情书", category: "暧昧升温", desc: "夹在TA书页最深处，写满平时绝口不提的深情。(建议开启历史)", prompt: "{{user}} 在 {{char}} 书里发现一封未寄出的信。以 {{char}} 第一人称写下平时绝不会说出口的在意、软肋与深情。CSS样式：玫瑰粉(#DDA0B0)微光边框配半透明白底信笺，手写风深色字。" },
+  { id: "r_future", name: "💍 五年后番外", category: "暧昧升温", desc: "快进到五年后！你们已经熟稔相伴的甜腻周末。", prompt: "【时间快进：五年后】描写五年后的某个寻常周末，{{char}} 与 {{user}} 亲密同居的起床、做早饭或窝在沙发的默契宠溺日常。CSS样式：清透浅色杂志画报风毛玻璃卡片。" },
+  { id: "f_xhs", name: "📕 小红书求助贴", category: "趣味吐槽", desc: "TA披马甲发帖《家人们谁懂啊》，评论区笑疯！(建议开启历史)", prompt: "{{char}} 偷偷注册小号在小红书发情感求助笔记（试图隐瞒身份但细节全暴露）。生成笔记正文、配图描述，及6条网友神评与 {{char}} 破防回复。CSS样式：清透白底小红书卡片布局。" },
+  { id: "f_group", name: "💬 损友群吃瓜", category: "趣味吐槽", desc: "TA的亲友群正在疯狂八卦你俩，TA嘴硬被秒拆穿！(建议开启历史)", prompt: "生成 {{char}} 亲友微信群聊天记录：群友发现 {{char}} 对 {{user}} 的双标现场疯狂起哄，{{char}} 出来嘴硬挽尊却被秒晒证据打脸。CSS样式：清透浅色毛玻璃群聊气泡界面。" },
+  { id: "f_truth", name: "🧪 吐真剂事故", category: "趣味吐槽", desc: "误喝真话药水！嘴上不受控制狂飙真心话。(建议开启历史)", prompt: "{{char}} 误喝掺有'真话药水'的饮料，面对 {{user}} 的提问拼命想捂嘴，却不受控制把最羞耻直白的爱意与占有欲全说了出来。CSS样式：清透柔粉毛玻璃卡片，带心动波浪线装饰。" },
+  { id: "f_fluffy", name: "🐾 变成毛茸茸", category: "趣味吐槽", desc: "一觉醒来长出兽耳和尾巴！尾巴诚实地缠上来啦。", prompt: "{{char}} 一觉醒来长出了毛茸茸的兽耳和尾巴！嘴上还在傲娇维持人设，但 {{user}} 一靠近耳朵就抖，尾巴诚实地缠上 {{user}} 手腕。CSS样式：清透浅色手账玻璃卡，带小爪印点缀。" },
+  { id: "p_school", name: "🏫 青春校园", category: "平行世界", desc: "现代高中PA。同桌、传纸条、午后的操场。", prompt: "【平行世界：现代高中】忽略历史背景。{{char}} 与同桌 {{user}} 在午后教室悄悄传纸条或放学独处的暧昧场景。CSS样式：清透白底横线信笺风，深色手写体。" },
+  { id: "p_fantasy", name: "⚔️ 西幻史诗", category: "平行世界", desc: "剑与魔法。冒险者公会与休息时的擦拭。", prompt: "【平行世界：西幻冒险】忽略历史背景。{{char}} 与队友 {{user}} 在攻略迷宫后休息包扎的温馨暧昧片段。CSS样式：浅米白半透明羊皮信笺风，淡金细边框与深色字。" },
+  { id: "p_cyber", name: "🤖 全息未来", category: "平行世界", desc: "未来都市。精密调试与全息玻璃面板。", prompt: "【平行世界：未来都市】忽略历史背景。{{char}} 正在为 {{user}} 调试专属设备或进行机密交接。CSS样式：极简清透浅色全息毛玻璃面板，蓝紫(#8A95F0)细框与深色文字。" },
+  { id: "p_xianxia", name: "🏔️ 仙侠修真", category: "平行世界", desc: "师尊与徒弟，洞府传功或桃花树下对酌。", prompt: "【平行世界：古风修仙】忽略历史背景。{{char}} 与 {{user}} 在云端洞府传功或桃花树下独处的场景。CSS样式：清透素白宣纸毛玻璃卡片，水墨淡雅细框。" },
+  { id: "p_office", name: "💼 职场精英", category: "平行世界", desc: "上司与搭档，茶水间偷偷牵手或加班宵夜。", prompt: "【平行世界：现代职场】忽略历史背景。{{char}} 与 {{user}} 在茶水间偶遇偷偷牵手或办公室分享宵夜。CSS样式：通透浅色玻璃极简卡片，清爽深色文字。" },
+  { id: "p_detective", name: "🕵️ 悬疑侦探", category: "平行世界", desc: "复古年代，雨声、红茶与私家侦探事务所。", prompt: "【平行世界：复古侦探】忽略历史背景。{{char}} 与 {{user}} 在下着雨的午后事务所里共饮红茶推理案情。CSS样式：浅米白半透明档案卡质感，复古深色字体。" },
+  { id: "p_harry", name: "🪄 魔法学院", category: "平行世界", desc: "分院帽、魔药课与图书馆禁书区夜游。", prompt: "【平行世界：魔法学院】忽略历史背景。{{char}} 和 {{user}} 披着隐形衣在图书馆夜游或魔药课搭档。CSS样式：清透珍珠白毛玻璃卡片，星芒细线边框。" },
+  { id: "p_apocalypse", name: "🧟 末日安全屋", category: "平行世界", desc: "废土世界，安全屋里相依为命的温暖。", prompt: "【平行世界：末日安全屋】忽略历史背景。{{char}} 和 {{user}} 在洒满阳光的安全屋里分享物资、互相依偎。CSS样式：清透暖白手记卡片，深色清晰字迹。" },
+  { id: "p_royal", name: "👑 宫廷权谋", category: "平行世界", desc: "皇室与近侍，华丽宫殿里的耳鬓厮磨。", prompt: "【平行世界：宫廷权谋】忽略历史背景。{{char}} 与 {{user}} 在纱幔低垂的宫殿内低声密谋或耳鬓厮磨，张力拉满。CSS样式：清透珠光白毛玻璃卡片，玫瑰金细框。" },
+  { id: "p_cthulhu", name: "🐙 诡秘调查", category: "平行世界", desc: "神秘学与未知的浪漫，调查员的奇遇故事。", prompt: "【平行世界：神秘调查】忽略历史背景。调查员 {{char}} 和 {{user}} 共同解读一份古老星象手稿。CSS样式：浅色半透明古卷卡片，蓝紫星轨边框装饰。" },
+  { id: "p_abo", name: "🌸 信息素失控", category: "平行世界", desc: "ABO设定！突发易感期/发热期的气息交融。", prompt: "【平行世界：ABO设定】{{char}} 突发易感期/发热期，自制力在 {{user}} 的信息素面前瓦解，将 {{user}} 紧紧圈在怀里寻求安抚。CSS样式：清透浅粉毛玻璃卡片，玫瑰粉(#DDA0B0)微光边框。" },
+  { id: "p_variety", name: "🌟 恋综心动信号", category: "平行世界", desc: "恋爱综艺直播中！发送心动短信与观察室尖叫。", prompt: "【平行世界：恋爱综艺】包含两部分：1. 晚间匿名发送【心动短信】时 {{char}} 删改后发出的内容；2. 观察室嘉宾看着两人互动疯狂嗑CP的弹幕。CSS样式：清透玻璃气泡卡，带心动波浪线。" },
+  { id: "p_vampire", name: "🍷 血族玫瑰夜", category: "平行世界", desc: "古堡晚宴，高贵的血族公爵与专属猎物。", prompt: "【平行世界：血族幻想】月光透过彩窗洒入古堡，血族贵族 {{char}} 将 {{user}} 困在丝绒帷幔间，指尖拂过颈侧，眼神炽热克制。CSS样式：清透象牙白毛玻璃卡片，玫瑰粉与淡紫双色细框。" }
+];
   }
 });
 
@@ -12702,6 +12718,15 @@ function renderToShadowDOMReal(container, html) {
                 padding: 0;
                 min-height: 100%;
             }
+            .t-shadow-content > div,
+            .t-shadow-content > section,
+            .t-shadow-content > article {
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                border-radius: 0 !important;
+                box-sizing: border-box !important;
+            }
             img, video { max-width: 100%; height: auto; }
             a { color: #90cdf4; }
             ${forceOverrideStyles}
@@ -13426,26 +13451,29 @@ function escapeHtmlText(str) {
   return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
 }
 function buildChainMergedHtml(chainItems) {
+
   const items = Array.isArray(chainItems) ? chainItems : [];
+
   if (items.length === 0) return "";
-  return items.map((item, idx) => {
-    const roundNo = Number(item?.round) || idx + 1;
-    const type = String(item?.type || (idx === 0 ? "initial" : "continuation"));
-    const instruction = String(item?.instruction || "").trim() || (type === "initial" ? "\uFF08\u9996\u6B21\u751F\u6210\uFF09" : "\uFF08\u81EA\u7136\u7EED\u5199\uFF09");
+
+  return items.map((item) => {
+
     const html = String(item?.html || "").trim();
-    const title = type === "initial" ? "\u9996\u6B21\u751F\u6210" : `\u7B2C ${roundNo} \u6BB5\u7EED\u5199`;
-    const instructionLabel = type === "initial" ? "\u751F\u6210\u8BF4\u660E" : "\u7EED\u5199\u6307\u4EE4";
+
     return `
-            <section class="t-chain-segment" data-round="${roundNo}">
-                <div class="t-chain-segment-head">
-                    <div class="t-chain-segment-title">${escapeHtmlText(title)}</div>
-                    <div class="t-chain-segment-instruction">${instructionLabel}\uFF1A${escapeHtmlText(instruction)}</div>
-                </div>
+
+            <section class="t-chain-segment">
+
                 <div class="t-chain-segment-body">${html}</div>
+
             </section>
+
         `;
+
   }).join("\n");
+
 }
+
 function buildChainSignature(scriptId, rounds) {
   const payload = `${String(scriptId || "")}|${(Array.isArray(rounds) ? rounds : []).map((r) => `${r.round}#${String(r.type || "continuation").trim()}#${String(r.instruction || "").trim()}#${String(r.content || "").trim()}`).join("|")}`;
   let hash = 0;
@@ -13529,13 +13557,77 @@ async function getExpandedUserNameForMasking() {
 function createOffscreenExportDom(widthPx) {
   const root = document.createElement("div");
   root.className = "titania-offscreen-export";
-  root.style.cssText = `position:fixed; left:-10000px; top:0; width:${widthPx}px; background:#0b0b0b; z-index:0; overflow:visible;`;
+  root.style.cssText = `position:fixed; left:-10000px; top:0; width:${widthPx}px; z-index:0; overflow:visible; background:#ffffff;`;
+
   const zone = document.createElement("div");
-  zone.style.cssText = "width:100%; height:auto; overflow:visible;";
+  zone.style.cssText = `width:100%; height:auto; overflow:visible; background:#ffffff;`;
+
+  // ── 顶部装饰条（无渐隐线，空心套实心星芒 + 碎光） ──
+  const headerBar = document.createElement("div");
+  headerBar.style.cssText = `
+    width:100%;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    padding:0 16px;
+    box-sizing:border-box;
+    gap:6px;
+  `;
+  headerBar.innerHTML = `
+    <svg width="13" height="18" viewBox="0 0 24 34" fill="none" style="flex-shrink:0;">
+      <path d="M12 1 C12 9 15 16 22 17 C15 18 12 25 12 33 C12 25 9 18 2 17 C9 16 12 9 12 1 Z" stroke="#caa976" stroke-width="1.2" fill="none" opacity="0.65"/>
+      <path d="M12 7 C12 12 14 16 18 17 C14 18 12 22 12 27 C12 22 10 18 6 17 C10 16 12 12 12 7 Z" fill="#caa976"/>
+    </svg>
+    <span style="color:rgba(202,169,118,0.65); font-size:11px; letter-spacing:1.5px;">· ˚ ✧</span>
+
+    <span style="color:#caa976; font-size:14.5px; font-style:italic; font-family:'Snell Roundhand','Brush Script MT','Segoe Script',cursive; letter-spacing:3px; padding:0 6px; font-weight:500;">
+      Luminous Jottings
+    </span>
+
+    <span style="color:rgba(202,169,118,0.65); font-size:11px; letter-spacing:1.5px;">✧ ˚ ·</span>
+    <svg width="13" height="18" viewBox="0 0 24 34" fill="none" style="flex-shrink:0;">
+      <path d="M12 1 C12 9 15 16 22 17 C15 18 12 25 12 33 C12 25 9 18 2 17 C9 16 12 9 12 1 Z" stroke="#caa976" stroke-width="1.2" fill="none" opacity="0.65"/>
+      <path d="M12 7 C12 12 14 16 18 17 C14 18 12 22 12 27 C12 22 10 18 6 17 C10 16 12 12 12 7 Z" fill="#caa976"/>
+    </svg>
+  `;
+
+  // ── 内容容器（零间距撑满） ──
   const content = document.createElement("div");
+  content.style.cssText = `width:100%; margin:0; padding:0;`;
+
+  // ── 底部装饰条（渐隐落幕流线 + 双层星芒 + fin） ──
+  const footerBar = document.createElement("div");
+  footerBar.style.cssText = `
+    width:100%;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    background:transparent;
+  `;
+  footerBar.innerHTML = `
+    <span style="height:1px; width:50px; background:linear-gradient(90deg, transparent, #caa976); flex-shrink:0;"></span>
+    <svg width="12" height="17" viewBox="0 0 24 34" fill="none" style="flex-shrink:0;">
+      <path d="M12 1 C12 9 15 16 22 17 C15 18 12 25 12 33 C12 25 9 18 2 17 C9 16 12 9 12 1 Z" stroke="#caa976" stroke-width="1.2" fill="none" opacity="0.65"/>
+      <path d="M12 7 C12 12 14 16 18 17 C14 18 12 22 12 27 C12 22 10 18 6 17 C10 16 12 12 12 7 Z" fill="#caa976"/>
+    </svg>
+    <span style="color:#caa976; font-size:14px; font-style:italic; font-family:'Snell Roundhand','Brush Script MT','Segoe Script',cursive; letter-spacing:2.5px; font-weight:500; padding:0 4px;">fin</span>
+    <svg width="12" height="17" viewBox="0 0 24 34" fill="none" style="flex-shrink:0;">
+      <path d="M12 1 C12 9 15 16 22 17 C15 18 12 25 12 33 C12 25 9 18 2 17 C9 16 12 9 12 1 Z" stroke="#caa976" stroke-width="1.2" fill="none" opacity="0.65"/>
+      <path d="M12 7 C12 12 14 16 18 17 C14 18 12 22 12 27 C12 22 10 18 6 17 C10 16 12 12 12 7 Z" fill="#caa976"/>
+    </svg>
+    <span style="height:1px; width:50px; background:linear-gradient(90deg, #caa976, transparent); flex-shrink:0;"></span>
+  `;
+
+  zone.appendChild(headerBar);
   zone.appendChild(content);
+  zone.appendChild(footerBar);
   root.appendChild(zone);
   document.body.appendChild(root);
+
   return { root, zone, content };
 }
 function waitForNextPaint(frames = 2) {
@@ -14730,18 +14822,33 @@ ${html2}`;
         }
       }
       const onScreenZone = document.getElementById("t-read-capture-zone");
-      const widthPx = Math.ceil(onScreenZone?.getBoundingClientRect?.().width || 900);
-      offscreen = createOffscreenExportDom(widthPx);
+      const widthPx = Math.max(Math.ceil(onScreenZone?.getBoundingClientRect?.().width || 900), window.innerWidth || 900);      offscreen = createOffscreenExportDom(widthPx);
       renderToShadowDOMReal(offscreen.content, maskedHtml);
       await waitForFontsReady(1500);
       await waitForNextPaint(2);
       await waitForImagesLoadedDeep(offscreen.root, 5e3);
       await waitForNextPaint(1);
       const dataUrl = await htmlToImage.toPng(offscreen.zone, {
-        backgroundColor: "#0b0b0b",
-        pixelRatio: 2,
-        skipAutoScale: true
-      });
+
+    backgroundColor: "#ffffff",
+
+    pixelRatio: 2,
+
+    skipAutoScale: true,
+
+    width: widthPx,
+
+    style: {
+
+        width: widthPx + "px",
+
+        maxWidth: widthPx + "px",
+
+        overflow: "visible"
+
+    }
+
+});
       const link = document.createElement("a");
       link.download = `Titania_${(/* @__PURE__ */ new Date()).getTime()}.png`;
       link.href = dataUrl;
@@ -26429,33 +26536,42 @@ function ensureMenuStyle() {
         min-width: 170px;
         display: grid;
         gap: 6px;
-        padding: 8px;
-        border-radius: 10px;
-        border: 1px solid rgba(120, 150, 170, 0.35);
-        background: rgba(14, 20, 28, 0.96);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--t-border, rgba(138, 149, 240, 0.45));
+        background: var(--t-bg-panel, rgba(255, 255, 255, 0.72));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(138, 149, 240, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.75);
     }
     #${MENU_ID} .t-outline-entry-item {
-        border: 1px solid rgba(120, 150, 170, 0.25);
+        border: 1px solid var(--t-border, rgba(221, 160, 176, 0.45));
         border-radius: 8px;
-        background: rgba(18, 28, 38, 0.8);
-        color: #d7e7f5;
+        background: rgba(255, 255, 255, 0.65);
+        color: #5E4B70;
+        font-weight: 600;
         text-align: left;
         padding: 8px 10px;
         cursor: pointer;
     }
     #${MENU_ID} .t-outline-entry-item:hover:not(:disabled) {
-        background: rgba(129, 236, 236, 0.14);
+        background: rgba(255, 255, 255, 0.92);
+        border-color: var(--t-theme, #8A95F0);
     }
     #${MENU_ID} .t-outline-entry-item:disabled {
         opacity: 0.45;
         cursor: not-allowed;
     }
     #${MENU_ID} .t-outline-entry-tip {
-        color: #7f96aa;
+        color: #8E73B8;
         font-size: 11px;
         line-height: 1.35;
         padding: 0 2px;
+    }
+    .t-run-queue.inactive {
+        background: var(--t-bg-panel, #E7DDEA) !important;
+        color: #5E4B70 !important;
+        border-left: 1px solid var(--t-border, #DCCDF2) !important;
     }`;
   document.head.appendChild(style);
 }
@@ -26474,63 +26590,7 @@ function hasSceneSourcePlan() {
   const data = getExtData();
   return typeof data?.[SCENE_SOURCE_PLAN_KEY2] === "string" && data[SCENE_SOURCE_PLAN_KEY2].trim().length > 0;
 }
-function getEnabledFeatureList(data) {
-  const toolbarItems = data?.quick_toolbar?.enabled_items || {};
-  const showTheater = data?.outline_entry?.show_theater === true;
-  const showOutlineActions = data?.outline_entry?.show_outline_actions === true;
-  const rewriteEnabled = data?.rewrite_entry?.enabled === true;
-  const loreEnabled = toolbarItems.lore === true;
-  const recallEnabled = toolbarItems.recall === true;
-  const features = [];
-  if (showTheater) features.push("theater");
-  if (showOutlineActions) features.push("outline_actions");
-  if (rewriteEnabled) features.push("rewrite");
-  if (loreEnabled) features.push("lore");
-  if (recallEnabled) features.push("recall");
-  return features;
-}
-async function openFeatureDirect(featureKey, canOpenScenes) {
-  switch (featureKey) {
-    case "theater": {
-      const { openMainWindow: openMainWindow2 } = await Promise.resolve().then(() => (init_mainWindow(), mainWindow_exports));
-      openMainWindow2();
-      return;
-    }
-    case "outline_actions": {
-      const { openStoryOutlineWindow: openStoryOutlineWindow2 } = await Promise.resolve().then(() => (init_storyOutlineWindow(), storyOutlineWindow_exports));
-      openStoryOutlineWindow2();
-      return;
-    }
-    case "rewrite": {
-      const { openRewritePanelFromMenu: openRewritePanelFromMenu2 } = await Promise.resolve().then(() => (init_rewriteEntryButton(), rewriteEntryButton_exports));
-      openRewritePanelFromMenu2();
-      return;
-    }
-    case "lore": {
-      const { showLoreReviewWindow: showLoreReviewWindow2 } = await Promise.resolve().then(() => (init_loreReviewWindow(), loreReviewWindow_exports));
-      showLoreReviewWindow2();
-      return;
-    }
-    case "recall": {
-      const { openRecallPanel: openRecallPanel2 } = await Promise.resolve().then(() => (init_memoryRecallPanel(), memoryRecallPanel_exports));
-      openRecallPanel2();
-      return;
-    }
-    default:
-      return;
-  }
-}
-async function tryOpenSingleFeatureDirect() {
-  const data = getExtData();
-  if (data?.outline_entry?.enabled !== true) return false;
-  const features = getEnabledFeatureList(data);
-  if (features.length !== 1) return false;
-  const hasPlans = getSavedPlanCount() > 0;
-  const hasSource = hasSceneSourcePlan();
-  const canOpenScenes = hasPlans && hasSource;
-  await openFeatureDirect(features[0], canOpenScenes);
-  return true;
-}
+
 async function openMenu($btn) {
   ensureMenuStyle();
   closeMenu();
@@ -26550,7 +26610,7 @@ async function openMenu($btn) {
             <i class="fa-solid fa-clapperboard"></i> \u53D1\u9001\u7EC6\u7EB2
         </button>` : ""}
         ${showTheater ? `<button class="t-outline-entry-item" id="t-outline-entry-open-theater" role="menuitem">
-            <i class="fa-solid fa-masks-theater"></i> \u56DE\u58F0\u5C0F\u5267\u573A
+            <i class="fa-solid fa-masks-theater"></i> 池绛夫妇の心动放映室
         </button>` : ""}
         ${showOutlineActions ? `<button class="t-outline-entry-item" id="t-outline-entry-open-outline" role="menuitem">
             <i class="fa-solid fa-list-check"></i> \u751F\u6210\u5927\u7EB2
@@ -26633,8 +26693,6 @@ function bindClick($btn) {
       closeMenu();
       return;
     }
-    const openedDirectly = await tryOpenSingleFeatureDirect();
-    if (openedDirectly) return;
     await openMenu($btn);
   });
   $btn.off("keydown").on("keydown", async (e) => {
@@ -26645,8 +26703,6 @@ function bindClick($btn) {
       closeMenu();
       return;
     }
-    const openedDirectly = await tryOpenSingleFeatureDirect();
-    if (openedDirectly) return;
     await openMenu($btn);
   });
 }
@@ -29072,7 +29128,7 @@ function openEditor(id, source = "main") {
   const isEdit = !!id;
   let data = { id: Date.now().toString(), name: "\u65B0\u5267\u672C", desc: "", prompt: "", category: "" };
   if (isEdit) data = GlobalState.runtimeScripts.find((s) => s.id === id);
-  const isPreset = data._type === "preset";
+  const isPreset = false;
   if (source === "manager") {
     $("#t-mgr-view").hide();
   } else {
@@ -29082,31 +29138,39 @@ function openEditor(id, source = "main") {
   const dataListOpts = existingCats.map((c) => `<option value="${c}">`).join("");
   const html = `
     <div class="t-box" id="t-editor-view">
-        <div class="t-header"><span class="t-title-main">${isPreset ? "\u67E5\u770B" : isEdit ? "\u7F16\u8F91" : "\u65B0\u5EFA"}</span></div>
+        <style>
+            #t-editor-view .t-input, #t-large-edit-view .t-input {
+                background-color: #F2F0F5 !important;
+                color: #4A4458 !important;
+                border: 1px solid #D8D0E5 !important;
+                opacity: 1 !important;
+            }
+        </style>
+        <div class="t-header"><span class="t-title-main">${isEdit ? "\u7F16\u8F91" : "\u65B0\u5EFA"}</span></div>
         <div class="t-body">
             <div style="display:flex; gap:10px; margin-bottom:5px;">
                 <div style="flex-grow:1;">
                     <label>\u6807\u9898:</label>
-                    <input id="ed-name" class="t-input" value="${data.name}" ${isPreset ? "disabled" : ""}>
+                    <input id="ed-name" class="t-input" value="${data.name}">
                 </div>
                 <div style="width: 150px;">
                     <label>\u5206\u7C7B:</label>
-                    <input id="ed-cat" list="ed-cat-list" class="t-input" value="${data.category || ""}" placeholder="\u9ED8\u8BA4" ${isPreset ? "disabled" : ""}>
+                    <input id="ed-cat" list="ed-cat-list" class="t-input" value="${data.category || ""}" placeholder="\u9ED8\u8BA4">
                     <datalist id="ed-cat-list">${dataListOpts}</datalist>
                 </div>
             </div>
 
-            <label>\u7B80\u4ECB:</label><input id="ed-desc" class="t-input" value="${data.desc}" ${isPreset ? "disabled" : ""}>
+            <label>\u7B80\u4ECB:</label><input id="ed-desc" class="t-input" value="${data.desc}">
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
                 <label>Prompt:</label>
-                ${!isPreset ? `<div class="t-tool-btn" id="ed-btn-expand" style="cursor:pointer;"><i class="fa-solid fa-maximize"></i> \u5927\u5C4F</div>` : ""}
+                <div class="t-tool-btn" id="ed-btn-expand" style="cursor:pointer;"><i class="fa-solid fa-maximize"></i> \u5927\u5C4F</div>
             </div>
-            <textarea id="ed-prompt" class="t-input" rows="6" ${isPreset ? "disabled" : ""}>${data.prompt}</textarea>
+            <textarea id="ed-prompt" class="t-input" rows="6">${data.prompt}</textarea>
             
             <div class="t-btn-row">
-                ${!isPreset ? '<button id="ed-save" class="t-btn primary" style="flex:1;">\u4FDD\u5B58</button>' : ""}
                 <button id="ed-cancel" class="t-btn" style="flex:1;">\u8FD4\u56DE</button>
+                <button id="ed-save" class="t-btn primary" style="flex:1;">\u4FDD\u5B58</button>
             </div>
         </div>
     </div>`;
@@ -29180,8 +29244,14 @@ function openEditor(id, source = "main") {
   });
   if (!isPreset) {
     $("#ed-save").on("click", () => {
+      const extD = getExtData();
+      if (data._type === "preset") {
+        if (!extD.disabled_presets) extD.disabled_presets = [];
+        if (!extD.disabled_presets.includes(data.id)) extD.disabled_presets.push(data.id);
+      }
+      const savedId = isEdit ? data.id : "user_" + Date.now();
       saveUserScript({
-        id: isEdit ? data.id : "user_" + Date.now(),
+        id: savedId,
         name: $("#ed-name").val(),
         desc: $("#ed-desc").val(),
         prompt: $("#ed-prompt").val(),
@@ -29193,7 +29263,9 @@ function openEditor(id, source = "main") {
         openScriptManager();
       } else {
         $("#t-main-view").show();
+        applyScriptSelection(savedId);
       }
+      if (window.toastr) toastr.success("\u4FDD\u5B58\u6210\u529F");
     });
   }
 }
@@ -29276,220 +29348,408 @@ function saveContinuationRecentInstruction(instruction) {
   data.continuation_ui.recent_instructions = [text, ...deduped].slice(0, CONTINUATION_RECENT_MAX);
   saveExtData();
 }
+function ensureSceneHistorySynced() {
+  const extD = getExtData();
+  if (!Array.isArray(extD.scene_history)) extD.scene_history = [];
+  if (extD.scene_history.length === 0 && Array.isArray(extD.favs) && extD.favs.length > 0) {
+    extD.favs.forEach((f) => {
+      extD.scene_history.push({
+        content: f.html || "",
+        scriptId: f.scriptId || "",
+        scriptName: f.scriptName || (f.title ? f.title.split(" - ")[0] : "场景"),
+        timestamp: typeof f.id === "number" && f.id > 1000000 ? f.id : Date.now(),
+        isRead: true,
+        favId: f.id || null
+      });
+    });
+    saveExtData();
+  }
+  GlobalState.sceneHistory.items = extD.scene_history;
+  return extD.scene_history;
+}
+
+function extractPlainSnippetEnds(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = String(html || "").replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+  const text = (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
+  if (!text) return { head: "（无纯文本内容）", tail: "", length: 0 };
+  if (text.length <= 90) return { head: text, tail: "", length: text.length };
+  return {
+    head: text.slice(0, 48) + "…",
+    tail: "…" + text.slice(-48),
+    length: text.length
+  };
+}
+
+function openPastSceneProjector() {
+  if ($("#t-past-projector-modal").length) return;
+  const historyList = ensureSceneHistorySynced();
+  const modalHtml = `
+  <div id="t-past-projector-modal" class="t-dialog-overlay" style="z-index: 30085; padding: 12px; box-sizing: border-box;">
+    <div class="t-box" style="width: min(760px, 96vw); height: min(80vh, 720px); max-height: 88vh; display:flex; flex-direction:column; border-radius:12px; overflow:hidden; margin:auto;">
+      <div class="t-header" style="flex-shrink:0;">
+        <span class="t-title-main" style="font-size:1.15em;"><i class="fa-solid fa-book-open" style="margin-right:8px;"></i>选择过往手记（显示至生成界面）</span>
+        <span class="t-close" id="t-pp-close">&times;</span>
+      </div>
+      <div style="padding:10px 15px; border-bottom:1px solid var(--t-border, #333); display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; flex-shrink:0;">
+        <input type="text" id="t-pp-search" class="t-input" placeholder="🔍 搜索手记标题或内容..." style="flex:1; min-width:160px; padding:6px 10px;">
+        <button type="button" id="t-pp-reset-blank" class="t-btn" style="padding:6px 12px; font-size:0.85em;">
+          <i class="fa-solid fa-rotate-left"></i> 恢复默认空白界面
+        </button>
+      </div>
+      <div id="t-pp-list" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; min-height:0;"></div>
+    </div>
+  </div>`;
+  $("body").append(modalHtml);
+
+  const renderProjectorList = (kw = "") => {
+    const $list = $("#t-pp-list");
+    if (historyList.length === 0) {
+      $list.html('<div style="text-align:center; padding:40px; opacity:0.6;">暂无已生成的过往手记哦～</div>');
+      return;
+    }
+    const keyword = kw.trim().toLowerCase();
+    const activeIdx = GlobalState.displayState.isViewingHistory
+      ? GlobalState.displayState.currentViewIndex
+      : (GlobalState.lastGeneratedContent ? GlobalState.sceneHistory.currentIndex : -1);
+
+    const cards = [];
+    historyList.forEach((item, idx) => {
+      const snip = extractPlainSnippetEnds(item.content);
+      const title = item.scriptName || "场景";
+      if (keyword && !title.toLowerCase().includes(keyword) && !snip.head.toLowerCase().includes(keyword) && !snip.tail.toLowerCase().includes(keyword)) return;
+      const timeStr = new Date(item.timestamp || Date.now()).toLocaleString("zh-CN");
+      const isCurrent = idx === activeIdx && Boolean(GlobalState.lastGeneratedContent);
+      cards.push(`
+        <div class="t-wi-entry ${isCurrent ? "selected" : ""}" data-idx="${idx}" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <span style="font-weight:bold; font-size:1.02em; color:var(--t-theme, #bfa15f);">
+              #${idx + 1} · ${escapeHtmlText2(title)}
+              ${isCurrent ? '<span class="t-cat-tag" style="margin-left:6px; font-size:0.75em;">当前显示</span>' : ""}
+            </span>
+            <span style="font-size:0.8em; opacity:0.65;">${timeStr} · ${snip.length}字</span>
+          </div>
+          <div style="font-size:0.86em; opacity:0.85; line-height:1.45;">
+            <div><b>开头：</b>${escapeHtmlText2(snip.head)}</div>
+            ${snip.tail ? `<div style="margin-top:2px;"><b>结尾：</b>${escapeHtmlText2(snip.tail)}</div>` : ""}
+          </div>
+        </div>`);
+    });
+    $list.html(cards.length ? cards.join("") : '<div style="text-align:center; padding:40px; opacity:0.6;">未找到匹配的手记</div>');
+  };
+
+  renderProjectorList();
+  $("#t-pp-search").on("input", function() { renderProjectorList($(this).val()); });
+  $("#t-pp-close").on("click", () => $("#t-past-projector-modal").remove());
+  $("#t-past-projector-modal").on("click", (e) => { if (e.target === e.currentTarget) $("#t-past-projector-modal").remove(); });
+
+  $("#t-pp-reset-blank").on("click", () => {
+    unlockDisplay();
+    GlobalState.sceneHistory.items = [];
+    GlobalState.sceneHistory.currentIndex = -1;
+    GlobalState.lastGeneratedContent = "";
+    GlobalState.lastGeneratedScriptId = "";
+    GlobalState.lastFavId = null;
+    const outputContainer = document.getElementById("t-output-content");
+    if (outputContainer) {
+      outputContainer.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#555;"><i class="fa-solid fa-clapperboard" style="font-size:3em; margin-bottom:15px; opacity:0.5;"></i><div style="font-size:1.1em;">请选择剧本，开始演绎...</div></div>';
+    }
+    $("#t-stats-hud, #t-nav-prev, #t-nav-next, #t-page-indicator").hide();
+    updateFavButtonUI();
+    $("#t-past-projector-modal").remove();
+    if (window.toastr) toastr.info("已恢复默认空白生成界面");
+  });
+
+  $("#t-pp-list").on("click", ".t-wi-entry", function() {
+    const idx = parseInt($(this).data("idx"), 10);
+    const item = historyList[idx];
+    if (!item) return;
+    lockDisplayToHistory(idx);
+    GlobalState.sceneHistory.currentIndex = idx;
+    GlobalState.lastGeneratedContent = item.content;
+    GlobalState.lastGeneratedScriptId = item.scriptId;
+    GlobalState.lastFavId = item.favId || null;
+    renderGeneratedContent(item.content, item.scriptName || "场景");
+    const stats = countContentStats(item.content);
+    GlobalState.contentStats = { totalChars: stats.totalChars, chineseChars: stats.chineseChars, generationTime: 0, modelName: GlobalState.lastUsedModelName || "-" };
+    updateContentStatsDisplay(GlobalState.contentStats);
+    updateSceneHistoryNav();
+    updateFavButtonUI();
+    updateScriptTitleDisplay();
+    $("#t-past-projector-modal").remove();
+    if (window.toastr) toastr.success(`已在生成界面显示《${item.scriptName || "场景"}》，可点左右箭头翻页～`);
+  });
+}
+function buildContinuationModalHtml(scriptOptionsHtml, recentHtml) {
+  return `
+  <div id="t-continuation-editor-overlay" class="t-dialog-overlay" style="z-index: 30088; padding: 10px; box-sizing: border-box;">
+    <div id="t-continuation-editor" class="t-box" style="width: min(820px, 96vw); height: min(88vh, 840px); max-height: 92vh; display:flex; flex-direction:column; border-radius:12px; overflow:hidden; margin:auto;">
+      <div class="t-header" style="flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--t-theme, #bfa15f);"></i>
+          <span class="t-title-main" style="font-size:1.15em;">✨ 剧场续写工坊</span>
+        </div>
+        <span class="t-close" id="t-cont-close">&times;</span>
+      </div>
+      <div style="flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; min-height:0;">
+        <div style="padding:10px 12px; border:1px solid var(--t-border, #333); border-radius:8px;">
+          <div style="font-weight:bold; font-size:0.92em; margin-bottom:6px; color:var(--t-theme, #bfa15f);">
+            1️⃣ 选择小剧场预设（决定续写设定与排版样式）
+          </div>
+          <select id="t-cont-script-select" class="t-input" style="width:100%; cursor:pointer;">${scriptOptionsHtml}</select>
+          <div id="t-cont-script-desc" style="font-size:0.8em; opacity:0.75; margin-top:6px; line-height:1.4;"></div>
+        </div>
+        <div style="padding:10px 12px; border:1px solid var(--t-border, #333); border-radius:8px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span style="font-weight:bold; font-size:0.92em; color:var(--t-theme, #bfa15f);">
+              2️⃣ 点选已生成的小剧场（按点击先后顺序排列 1 → 2 → 3）
+            </span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <label style="font-size:0.82em; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                <input type="checkbox" id="t-cont-only-same"> 仅看同名预设
+              </label>
+              <button type="button" id="t-cont-clear-sel" class="t-btn" style="padding:3px 8px; font-size:0.78em;">清空重选</button>
+            </div>
+          </div>
+          <input type="text" id="t-cont-search" class="t-input" placeholder="🔍 搜索已生成的小剧场内容或标题..." style="padding:6px 10px; font-size:0.85em;">
+          <div id="t-cont-chain-bar" style="padding:8px 10px; border-radius:6px; border:1px dashed var(--t-border, #444); font-size:0.84em; line-height:1.5;"></div>
+          <div id="t-cont-scene-list" style="max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px;"></div>
+        </div>
+        <div style="padding:10px 12px; border:1px solid var(--t-border, #333); border-radius:8px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:bold; font-size:0.92em; color:var(--t-theme, #bfa15f);">
+              3️⃣ 补充续写方向指令（可选，留空则紧接最后一篇结尾自然续写）
+            </span>
+            <span id="t-cont-char-count" style="font-size:0.8em; opacity:0.7;">0 字</span>
+          </div>
+          <textarea id="t-cont-input" class="t-input" rows="3" placeholder="例如：紧接上面第3篇结尾继续写第4篇，两人情绪彻底爆发..." spellcheck="false" style="resize:vertical; min-height:68px;"></textarea>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:0.78em; opacity:0.7;">最近使用指令（点击填入）：</div>
+            <div id="t-cont-recent-list" style="display:flex; gap:6px; flex-wrap:wrap; max-height:64px; overflow:auto;">${recentHtml}</div>
+          </div>
+        </div>
+      </div>
+      <div class="t-wi-footer" style="flex-shrink:0; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 15px;">
+        <div id="t-cont-context-estimate" style="font-size:0.84em; opacity:0.8;">已选 0 篇 | 预估 0 字符</div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="t-btn" id="t-cont-cancel">取消</button>
+          <button type="button" class="t-btn primary" id="t-cont-submit" style="padding:8px 18px;">✨ 请先选择前序剧场</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openContPreviewSubmodal(item) {
+  if (!item) return;
+  $("#t-cont-preview-submodal").remove();
+  const previewHtml = `
+  <div id="t-cont-preview-submodal" class="t-dialog-overlay" style="z-index: 30095; padding: 14px;">
+    <div class="t-box" style="width: min(760px, 95vw); height: min(78vh, 680px); display:flex; flex-direction:column; border-radius:12px; overflow:hidden; margin:auto;">
+      <div class="t-header" style="flex-shrink:0;">
+        <span class="t-title-main" style="font-size:1.05em;">🔍 预览：${escapeHtmlText2(item.scriptName || "场景")}</span>
+        <span class="t-close" id="t-cont-prev-close">&times;</span>
+      </div>
+      <div id="t-cont-prev-body" style="flex:1; overflow-y:auto; padding:0; min-height:0;"></div>
+    </div>
+  </div>`;
+  $("body").append(previewHtml);
+  renderToShadowDOMReal(document.getElementById("t-cont-prev-body"), item.content);
+  $("#t-cont-prev-close").on("click", () => $("#t-cont-preview-submodal").remove());
+  $("#t-cont-preview-submodal").on("click", (ev) => {
+    if (ev.target === ev.currentTarget) $("#t-cont-preview-submodal").remove();
+  });
+}
+function updateContChainAndFooter(historyList, selectedOrder) {
+  const count = selectedOrder.length;
+  const nextNum = count + 1;
+  const $bar = $("#t-cont-chain-bar");
+  const $submit = $("#t-cont-submit");
+  const $est = $("#t-cont-context-estimate");
+
+  if (count === 0) {
+    $bar.html('<span style="opacity:0.7;">尚未选择前序剧场 — 请按剧情顺序点击下方卡片（先点第1篇，再点第2篇…）</span>');
+    $submit.text("✨ 请先选择前序剧场");
+    $est.text("已选 0 篇 | 预估 0 字符 (~0 tokens)");
+    return;
+  }
+
+  let totalChars = 0;
+  const stepsHtml = selectedOrder.map((histIdx, orderIdx) => {
+    const item = historyList[histIdx];
+    totalChars += (item?.content || "").length;
+    const name = item?.scriptName || "场景";
+    return `<span class="t-cat-tag" style="font-weight:bold;">第${orderIdx + 1}篇: ${escapeHtmlText2(name)}</span>`;
+  }).join(' <i class="fa-solid fa-arrow-right" style="font-size:0.8em; opacity:0.6;"></i> ');
+
+  $bar.html(`<div><b>发送顺序：</b>${stepsHtml} <i class="fa-solid fa-angles-right" style="color:var(--t-theme, #bfa15f);"></i> <b style="color:var(--t-theme, #bfa15f);">即将续写【第 ${nextNum} 篇】</b></div>`);
+  $submit.html(`<i class="fa-solid fa-wand-magic-sparkles"></i> 续写第 ${nextNum} 篇`);
+  const estTokens = Math.ceil(totalChars / 4);
+  $est.text(`已选 ${count} 篇 | 预估 ${totalChars} 字符 (~${estTokens} tokens)`);
+}
+
+function renderContSceneCards(historyList, selectedScriptId, selectedOrder, onlySameScript, searchKeyword) {
+  const $list = $("#t-cont-scene-list");
+  if (historyList.length === 0) {
+    $list.html('<div style="text-align:center; padding:30px; opacity:0.6;">暂无已生成的小剧场，请先生成至少一篇小剧场后再来续写哦～</div>');
+    updateContChainAndFooter(historyList, selectedOrder);
+    return;
+  }
+
+  const currentScriptObj = GlobalState.runtimeScripts.find((x) => x.id === selectedScriptId);
+  const kw = searchKeyword.trim().toLowerCase();
+  const rows = [];
+
+  historyList.forEach((item, idx) => {
+    if (onlySameScript && currentScriptObj) {
+      const matchId = item.scriptId && item.scriptId === currentScriptObj.id;
+      const matchName = item.scriptName && item.scriptName === currentScriptObj.name;
+      if (!matchId && !matchName) return;
+    }
+    const snip = extractPlainSnippetEnds(item.content);
+    const title = item.scriptName || "场景";
+    if (kw && !title.toLowerCase().includes(kw) && !snip.head.toLowerCase().includes(kw) && !snip.tail.toLowerCase().includes(kw)) return;
+
+    const orderPos = selectedOrder.indexOf(idx);
+    const isSelected = orderPos !== -1;
+    const timeStr = new Date(item.timestamp || Date.now()).toLocaleString("zh-CN");
+    const badgeHtml = isSelected
+      ? `<span class="t-btn primary" style="padding:2px 10px; border-radius:999px; font-size:0.82em; font-weight:bold;">✔ 第 ${orderPos + 1} 篇</span>`
+      : `<span class="t-cat-tag" style="padding:2px 8px; border-radius:999px; font-size:0.8em; opacity:0.75;">+ 点击加入排序</span>`;
+
+    rows.push(`
+      <div class="t-wi-entry t-cont-scene-card ${isSelected ? "selected" : ""}" data-idx="${idx}" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${badgeHtml}
+            <span style="font-weight:bold; font-size:0.95em;">${escapeHtmlText2(title)}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.78em; opacity:0.65;">${timeStr} · ${snip.length}字</span>
+            <button type="button" class="t-btn t-cont-preview-btn" data-idx="${idx}" style="padding:2px 8px; font-size:0.76em;">
+              <i class="fa-solid fa-eye"></i> 预览
+            </button>
+          </div>
+        </div>
+        <div style="font-size:0.83em; opacity:0.85; line-height:1.45;">
+          <div><b>开头：</b>${escapeHtmlText2(snip.head)}</div>
+          ${snip.tail ? `<div style="margin-top:2px;"><b>结尾：</b>${escapeHtmlText2(snip.tail)}</div>` : ""}
+        </div>
+      </div>`);
+  });
+
+  $list.html(rows.length ? rows.join("") : '<div style="text-align:center; padding:25px; opacity:0.6;">没有符合筛选条件的小剧场（可取消勾选“仅看同名预设”）</div>');
+  updateContChainAndFooter(historyList, selectedOrder);
+}
 function openContinuationComposer(initialText = "") {
   return new Promise((resolve) => {
+    const historyList = ensureSceneHistorySynced();
     const recent = getContinuationRecentInstructions();
-    const display = getCurrentDisplayContent();
-    const activeScriptId = display?.scriptId || GlobalState.lastGeneratedScriptId || GlobalState.lastUsedScriptId || $("#t-sel-script").val();
-    let selectedInjectRounds = getContinuationDefaultInjectCount();
+    const validScripts = sortScripts(GlobalState.runtimeScripts, getScriptSortMode());
+    let selectedScriptId = GlobalState.lastUsedScriptId || GlobalState.lastGeneratedScriptId || (validScripts[0]?.id || "");
+    let selectedOrder = [];
+    let onlySameScript = false;
+    let searchKeyword = "";
+
     $("#t-continuation-dialog").remove();
-    $("#t-continuation-editor").remove();
+    $("#t-continuation-editor-overlay").remove();
     $(document).off("keydown.tcontinuecomposer");
+
+    const scriptOptionsHtml = validScripts.map((s) => {
+      const cat = s.category || (s._type === "preset" ? "官方预设" : "未分类");
+      const sel = s.id === selectedScriptId ? "selected" : "";
+      return `<option value="${escapeHtmlText2(s.id)}" ${sel}>[${escapeHtmlText2(cat)}] ${escapeHtmlText2(s.name)}</option>`;
+    }).join("");
+
     const recentHtml = recent.length > 0 ? recent.map((item) => {
       const encoded = encodeURIComponent(item);
-      const display2 = item.length > 24 ? `${item.slice(0, 24)}\u2026` : item;
-      return `<button class="t-cont-recent-item" data-text="${encoded}" style="
-                            border:1px solid #3d3d3d;
-                            background:#262626;
-                            color:#ddd;
-                            border-radius:999px;
-                            padding:6px 12px;
-                            font-size:12px;
-                            cursor:pointer;
-                            max-width:100%;
-                            overflow:hidden;
-                            text-overflow:ellipsis;
-                            white-space:nowrap;
-                        " title="${escapeHtmlText2(item)}">${escapeHtmlText2(display2)}</button>`;
-    }).join("") : `<div style="color:#777; font-size:12px;">\u6682\u65E0\u6700\u8FD1\u7EED\u5199\u6307\u4EE4</div>`;
-    const html = `
-        <div id="t-continuation-editor" class="t-content-editor">
-            <div class="t-ce-header">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="color:#bfa15f;"></i>
-                    <span style="font-weight:bold;">\u4E3B\u52A8\u7EED\u5199\u6307\u4EE4</span>
-                    <span style="font-size:0.8em; color:#666;">\u652F\u6301 Ctrl+Enter \u5FEB\u901F\u53D1\u9001</span>
-                </div>
-                <div class="t-close" id="t-cont-close">&times;</div>
-            </div>
+      const display2 = item.length > 24 ? `${item.slice(0, 24)}…` : item;
+      return `<button type="button" class="t-cont-recent-item t-btn" data-text="${encoded}" style="border-radius:999px; padding:4px 10px; font-size:12px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtmlText2(item)}">${escapeHtmlText2(display2)}</button>`;
+    }).join("") : `<div style="opacity:0.6; font-size:12px;">暂无最近续写指令</div>`;
 
-            <div class="t-ce-body" style="display:flex; flex-direction:column; gap:10px; overflow:auto;">
-                <div style="color:#888; font-size:12px;">\u53EF\u7559\u7A7A\u8868\u793A\u201C\u81EA\u7136\u7EED\u5199\u201D\uFF1B\u4F1A\u57FA\u4E8E\u5F53\u524D\u5267\u573A\u4E0A\u4E0B\u6587\u7EE7\u7EED\u751F\u6210\u3002</div>
-
-                <textarea id="t-cont-input" class="t-ce-textarea" placeholder="\u4F8B\u5982\uFF1A\u8BA9\u4E24\u4EBA\u77DB\u76FE\u5347\u7EA7\uFF0C\u4F46\u4FDD\u6301\u514B\u5236\uFF0C\u4E0D\u8981\u7ACB\u523B\u548C\u89E3\u3002" spellcheck="false" style="height:auto; min-height:160px; flex:1;"></textarea>
-
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                    <button id="t-cont-expand" class="t-btn" style="padding:6px 10px; font-size:12px;">
-                        <i class="fa-solid fa-expand"></i> \u5C55\u5F00\u7F16\u8F91\u5668
-                    </button>
-                    <div id="t-cont-char-count" style="color:#777; font-size:12px;">0 \u5B57</div>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div style="color:#aaa; font-size:12px;">\u6700\u8FD1\u4F7F\u7528\uFF08\u6700\u591A ${CONTINUATION_RECENT_MAX} \u6761\uFF0C\u70B9\u51FB\u590D\u7528\uFF09</div>
-                    <div id="t-cont-recent-list" style="display:flex; gap:8px; flex-wrap:wrap; max-height:88px; overflow:auto;">${recentHtml}</div>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:8px; border:1px solid #333; border-radius:8px; padding:10px; background:#1e1e1e;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                        <div style="color:#ddd; font-size:12px;">\u6CE8\u5165\u6700\u8FD1\u7EED\u5199\u6761\u6570\uFF08\u6B63\u6587+\u6307\u4EE4\uFF09</div>
-                        <div id="t-cont-rounds-total" style="color:#9aa; font-size:12px;">\u5DF2\u751F\u6210\u8F6E\u6B21\uFF1A0</div>
-                    </div>
-                    <div id="t-cont-inject-buttons" style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="t-btn t-cont-inject-btn" data-count="1" style="padding:4px 10px; font-size:12px;">1 \u6761</button>
-                        <button type="button" class="t-btn t-cont-inject-btn" data-count="2" style="padding:4px 10px; font-size:12px;">2 \u6761</button>
-                        <button type="button" class="t-btn t-cont-inject-btn" data-count="3" style="padding:4px 10px; font-size:12px;">3 \u6761</button>
-                        <button type="button" class="t-btn t-cont-inject-btn" data-count="4" style="padding:4px 10px; font-size:12px;">4 \u6761</button>
-                        <button type="button" class="t-btn t-cont-inject-btn" data-count="5" style="padding:4px 10px; font-size:12px;">5 \u6761</button>
-                    </div>
-                    <div id="t-cont-context-estimate" style="color:#9aa; font-size:12px;">\u9884\u4F30\u4E0A\u4E0B\u6587\u957F\u5EA6\uFF1A0 \u5B57\u7B26 (~0 tokens)</div>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:6px; border:1px dashed #3a3a3a; border-radius:8px; padding:10px; background:#1b1b1b;">
-                    <label style="display:flex; align-items:center; gap:8px; color:#ddd; font-size:12px; cursor:pointer;">
-                        <input type="checkbox" id="t-cont-branch-mode" style="margin:0;">
-                        <span>\u4ECE\u5F53\u524D\u5185\u5BB9\u521B\u5EFA\u5206\u652F\u7EED\u5199</span>
-                    </label>
-                    <div style="color:#888; font-size:12px; line-height:1.5;">\u5F00\u542F\u540E\u4F1A\u4EE5\u5F53\u524D\u9875\u9762\u5185\u5BB9\u4F5C\u4E3A\u65B0\u5206\u652F\u8D77\u70B9\uFF0C\u4E0D\u4F1A\u6CBF\u7528\u540E\u7EED\u8F6E\u6B21\u3002</div>
-                </div>
-            </div>
-
-            <div class="t-ce-footer">
-                <div class="t-ce-stats"><span id="t-cont-char-count-footer">0 \u5B57</span></div>
-                <div class="t-ce-actions">
-                    <button class="t-btn" id="t-cont-cancel">\u53D6\u6D88</button>
-                    <button class="t-btn primary" id="t-cont-submit">\u53D1\u9001\u7EED\u5199</button>
-                </div>
-            </div>
-        </div>`;
-    const $host = $("#t-main-view");
-    if ($host.length) {
-      $host.append(html);
-    } else {
-      $("body").append(html);
-    }
-    const $dialog = $("#t-continuation-editor");
+    $("body").append(buildContinuationModalHtml(scriptOptionsHtml, recentHtml));
+    const $overlay = $("#t-continuation-editor-overlay");
     const $input = $("#t-cont-input");
-    const $charCount = $("#t-cont-char-count");
-    const $charCountFooter = $("#t-cont-char-count-footer");
-    const $expandBtn = $("#t-cont-expand");
-    const $injectButtons = $("#t-cont-inject-buttons");
-    const $roundsTotal = $("#t-cont-rounds-total");
-    const $contextEstimate = $("#t-cont-context-estimate");
-    const $branchMode = $("#t-cont-branch-mode");
     let resolved = false;
-    let expanded = false;
-    const finalize = (value) => {
+
+    const finalize = (val) => {
       if (resolved) return;
       resolved = true;
       $(document).off("keydown.tcontinuecomposer");
-      $dialog.remove();
-      resolve(value);
+      $("#t-cont-preview-submodal").remove();
+      $overlay.remove();
+      resolve(val);
     };
-    const updateCharCount = () => {
-      const count = `${$input.val().length} \u5B57`;
-      $charCount.text(count);
-      $charCountFooter.text(count);
+
+    const updateScriptDesc = () => {
+      const s = GlobalState.runtimeScripts.find((x) => x.id === selectedScriptId);
+      $("#t-cont-script-desc").text(s ? `简介：${s.desc || "无"}` : "");
     };
-    const ensureHasBaseContent = () => {
-      const displayContent = getCurrentDisplayContent();
-      const hasContent = Boolean(displayContent?.content && displayContent.content.trim().length > 0);
-      if (!hasContent) {
-        if (window.toastr) toastr.warning("\u6CA1\u6709\u53EF\u7EED\u5199\u7684\u5185\u5BB9\uFF0C\u8BF7\u5148\u751F\u6210\u573A\u666F", "Titania");
-        return false;
-      }
-      return true;
+
+    const refreshList = () => {
+      renderContSceneCards(historyList, selectedScriptId, selectedOrder, onlySameScript, searchKeyword);
     };
-    const trySubmit = () => {
-      if (!ensureHasBaseContent()) return;
-      finalize({
-        instruction: $input.val(),
-        injectRoundsCount: selectedInjectRounds,
-        branchFromCurrentView: $branchMode.is(":checked")
-      });
-    };
-    const updateInjectButtonsVisual = () => {
-      $injectButtons.find(".t-cont-inject-btn").each(function() {
-        const count = Number($(this).attr("data-count") || 0);
-        const isActive = count === selectedInjectRounds;
-        $(this).toggleClass("primary", isActive);
-        if (isActive) {
-          $(this).css({ borderColor: "#bfa15f", color: "#f3e3b2" });
-        } else {
-          $(this).css({ borderColor: "", color: "" });
-        }
-      });
-    };
-    const updateContextEstimate = () => {
-      const stats = getContinuationSessionStats(activeScriptId, selectedInjectRounds);
-      $roundsTotal.text(`\u5DF2\u751F\u6210\u8F6E\u6B21\uFF1A${stats.totalRounds}`);
-      $contextEstimate.text(`\u9884\u4F30\u4E0A\u4E0B\u6587\u957F\u5EA6\uFF1A${stats.estimatedChars} \u5B57\u7B26 (~${stats.estimatedTokens} tokens)`);
-      if (stats.estimatedTokens > CONTINUATION_TOKEN_WARN_THRESHOLD) {
-        $contextEstimate.css({ color: "#ff7675", fontWeight: "bold" });
-      } else {
-        $contextEstimate.css({ color: "#9aa", fontWeight: "" });
-      }
-    };
-    const applyExpandState = () => {
-      if (expanded) {
-        $dialog.css({
-          width: "98%",
-          maxWidth: "1100px",
-          height: "calc(100% - 20px)",
-          maxHeight: "none"
-        });
-        $input.css({ minHeight: "52vh" });
-        $expandBtn.html('<i class="fa-solid fa-compress"></i> \u6536\u8D77\u7F16\u8F91\u5668');
-      } else {
-        $dialog.css({
-          width: "",
-          maxWidth: "",
-          height: "",
-          maxHeight: ""
-        });
-        $input.css({ minHeight: "160px" });
-        $expandBtn.html('<i class="fa-solid fa-expand"></i> \u5C55\u5F00\u7F16\u8F91\u5668');
-      }
-    };
+
     $input.val(initialText || "");
-    updateCharCount();
-    applyExpandState();
-    updateInjectButtonsVisual();
-    updateContextEstimate();
-    setTimeout(() => $input.trigger("focus"), 0);
-    $input.on("input", updateCharCount);
-    $input.on("keydown", function(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        trySubmit();
-      }
+    $("#t-cont-char-count").text(`${$input.val().length} 字`);
+    updateScriptDesc();
+    refreshList();
+
+    $("#t-cont-script-select").on("change", function() {
+      selectedScriptId = $(this).val();
+      applyScriptSelection(selectedScriptId, { trackSelection: false });
+      updateScriptDesc();
+      if (onlySameScript) refreshList();
     });
-    $(document).on("keydown.tcontinuecomposer", function(e) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        finalize(null);
-      }
+
+    $("#t-cont-only-same").on("change", function() { onlySameScript = $(this).is(":checked"); refreshList(); });
+    $("#t-cont-search").on("input", function() { searchKeyword = $(this).val(); refreshList(); });
+    $("#t-cont-clear-sel").on("click", () => { selectedOrder = []; refreshList(); });
+
+    $("#t-cont-scene-list").on("click", ".t-cont-scene-card", function(e) {
+      if ($(e.target).closest(".t-cont-preview-btn").length) return;
+      const idx = parseInt($(this).data("idx"), 10);
+      const pos = selectedOrder.indexOf(idx);
+      if (pos === -1) selectedOrder.push(idx);
+      else selectedOrder.splice(pos, 1);
+      refreshList();
     });
-    $("#t-cont-close, #t-cont-cancel").on("click", () => finalize(null));
-    $("#t-cont-submit").on("click", () => trySubmit());
-    $expandBtn.on("click", function() {
-      expanded = !expanded;
-      applyExpandState();
+
+    $("#t-cont-scene-list").on("click", ".t-cont-preview-btn", function(e) {
+      e.stopPropagation();
+      const idx = parseInt($(this).data("idx"), 10);
+      openContPreviewSubmodal(historyList[idx]);
     });
-    $injectButtons.on("click", ".t-cont-inject-btn", function() {
-      selectedInjectRounds = clampInjectRoundsCount($(this).attr("data-count"));
-      saveContinuationDefaultInjectCount(selectedInjectRounds);
-      updateInjectButtonsVisual();
-      updateContextEstimate();
-    });
+
+    $input.on("input", () => { $("#t-cont-char-count").text(`${$input.val().length} 字`); });
+
     $("#t-cont-recent-list").on("click", ".t-cont-recent-item", function() {
       const text = decodeURIComponent($(this).attr("data-text") || "");
       $input.val(text);
-      updateCharCount();
+      $("#t-cont-char-count").text(`${$input.val().length} 字`);
       $input.trigger("focus");
+    });
+
+    $("#t-cont-submit").on("click", () => {
+      if (selectedOrder.length === 0) {
+        if (window.toastr) toastr.warning("请先在列表中按顺序点选至少 1 篇已生成的小剧场哦～", "Titania");
+        return;
+      }
+      finalize({
+        scriptId: selectedScriptId,
+        orderedScenes: selectedOrder.map((i) => historyList[i]).filter(Boolean),
+        instruction: $input.val().trim()
+      });
+    });
+
+    $("#t-cont-close, #t-cont-cancel").on("click", () => finalize(null));
+    $overlay.on("click", (e) => { if (e.target === e.currentTarget) finalize(null); });
+    $(document).on("keydown.tcontinuecomposer", function(e) {
+      if (e.key === "Escape") { e.preventDefault(); finalize(null); }
     });
   });
 }
+
 function refreshScriptList() {
   const $sel = $("#t-sel-script");
   $sel.empty();
@@ -29545,13 +29805,14 @@ async function openMainWindow() {
             
             <div class="t-header" style="flex-shrink:0;">
                 <div class="t-title-container" style="display:flex; flex-direction:column; overflow:hidden;">
-                    <div class="t-title-main" style="white-space:nowrap;">\u56DE\u58F0\u5C0F\u5267\u573A</div>
+                    <div class="t-title-main" style="white-space:nowrap;"> 池绛夫妇の心动放映室</div>
                     <div class="t-title-sub" id="t-title-sub">
                         \u2728 \u4E3B\u6F14: <span id="t-char-name">${defaultCtx.charName}</span>
                     </div>
                 </div>
                 <div style="display:flex; align-items:center; flex-shrink:0;">
-                    <i class="fa-solid fa-book-bookmark t-icon-btn" id="t-btn-favs" title="\u56DE\u58F0\u6536\u85CF\u5939"></i>
+                    <i class="fa-solid fa-clock-rotate-left t-icon-btn" id="t-btn-history-list" title="\u5386\u53F2\u751F\u6210\u8BB0\u5F55"></i>
+<i class="fa-solid fa-book-bookmark t-icon-btn" id="t-btn-favs" title="\u56DE\u58F0\u6536\u85CF\u5939"></i>
                     <i class="fa-solid fa-book-atlas t-icon-btn" id="t-btn-worldinfo" title="\u4E16\u754C\u4E66\u6761\u76EE\u7B5B\u9009"></i>
                     <i class="fa-solid fa-network-wired t-icon-btn" id="t-btn-profiles" title="\u5FEB\u901F\u5207\u6362API\u65B9\u6848"></i>
                     <i class="fa-solid fa-gear t-icon-btn" id="t-btn-settings" title="\u8BBE\u7F6E"></i>
@@ -29560,11 +29821,28 @@ async function openMainWindow() {
             </div>
 
             <div class="t-top-bar">
-                <div class="t-history-toggle" id="t-history-toggle">
-                    <label class="t-toggle-label">
-                        <input type="checkbox" id="t-use-history" ${GlobalState.useHistoryAnalysis ? "checked" : ""}>
-                        <span class="t-toggle-text">\u{1F4DC} \u8BFB\u53D6\u804A\u5929\u5386\u53F2</span>
-                    </label>
+                <style>
+                  .t-top-quick-row { display:flex; gap:8px; align-items:stretch; flex-shrink:0; }
+                  .t-top-quick-row .t-history-toggle { min-width:unset; padding:0 12px; user-select:none; }
+                  @media screen and (max-width: 600px) {
+                    .t-top-quick-row { width:100%; height:40px; gap:6px; }
+                    .t-top-quick-row .t-history-toggle { flex:1; width:auto; height:100%; min-width:0; padding:0 4px; justify-content:center; }
+                    .t-top-quick-row .t-toggle-text { font-size:0.84em; }
+                  }
+                </style>
+                <div class="t-top-quick-row">
+                    <div class="t-history-toggle" id="t-history-toggle">
+                        <label class="t-toggle-label">
+                            <input type="checkbox" id="t-use-history" ${GlobalState.useHistoryAnalysis ? "checked" : ""}>
+                            <span class="t-toggle-text">📜 聊天历史</span>
+                        </label>
+                    </div>
+                    <div class="t-history-toggle" id="t-btn-load-past" title="选择过往手记显示在生成界面">
+                        <span class="t-toggle-text">📖 过往手记</span>
+                    </div>
+                    <div class="t-history-toggle" id="t-btn-open-continue" title="打开独立续写工坊">
+                        <span class="t-toggle-text">✨ 续写剧场</span>
+                    </div>
                 </div>
                 <div class="t-mode-toggle" id="t-mode-toggle">
                     <div class="t-mode-btn ${GlobalState.generationMode === "narrative" ? "active" : ""}" data-mode="narrative">
@@ -29812,27 +30090,30 @@ async function openMainWindow() {
     }
     openContentEditor();
   });
-  $("#t-tool-continue").on("click", async function() {
+  const triggerContinuationWorkshop = async () => {
     $toolsPanel.hide();
     $toolsBtn.removeClass("active");
     if (GlobalState.isGenerating || GlobalState.queueState.isRunning) {
-      if (window.toastr) toastr.info("\u6B63\u5728\u751F\u6210\u4E2D\uFF0C\u8BF7\u7A0D\u5019...", "Titania");
+      if (window.toastr) toastr.info("正在生成中，请稍候...", "Titania");
       return;
     }
     const composeResult = await openContinuationComposer("");
     if (composeResult === null) return;
     const normalizedInstruction = String(composeResult?.instruction || "").trim();
-    const injectRoundsCount = clampInjectRoundsCount(composeResult?.injectRoundsCount ?? getContinuationDefaultInjectCount());
     if (normalizedInstruction) {
       saveContinuationRecentInstruction(normalizedInstruction);
     }
+    unlockDisplay();
     await handleUserContinuation({
+      scriptId: composeResult.scriptId,
+      orderedScenes: composeResult.orderedScenes || [],
       instruction: normalizedInstruction,
-      injectRoundsCount,
-      branchFromCurrentView: composeResult?.branchFromCurrentView === true,
-      fromCurrentView: true
+      autoLocate: true
     });
-  });
+  };
+  $("#t-tool-continue").on("click", triggerContinuationWorkshop);
+  $("#t-btn-open-continue").on("click", triggerContinuationWorkshop);
+  $("#t-btn-load-past").on("click", openPastSceneProjector);
   $(document).on("keydown.zenmode", function(e) {
     if (e.key === "Escape" && $("#t-main-view").hasClass("t-zen-mode")) {
       $("#t-tool-zen").click();
@@ -29949,6 +30230,7 @@ async function openMainWindow() {
     renderProfileMenu($(this));
     e.stopPropagation();
   });
+  $("#t-btn-history-list").on("click", openHistoryListModal);
   $("#t-btn-favs").on("click", openFavsWindow);
   $("#t-btn-worldinfo").on("click", openWorldInfoSelector);
   $("#t-btn-settings").on("click", openSettingsWindow);
@@ -30052,6 +30334,366 @@ async function openMainWindow() {
   updateRunButtonsState();
   updateQueueButtonUI();
 }
+function openHistoryListModal() {
+    if ($("#t-history-list-modal").length) return;
+    const extD = getExtData();
+    if (!Array.isArray(extD.scene_history)) extD.scene_history = [];
+
+    if (extD.scene_history.length === 0 && Array.isArray(extD.favs) && extD.favs.length > 0) {
+        extD.favs.forEach(f => {
+            extD.scene_history.push({
+                content: f.html || "",
+                scriptId: f.scriptId || "",
+                scriptName: f.scriptName || (f.title ? f.title.split(" - ")[0] : "场景"),
+                timestamp: (typeof f.id === 'number' && f.id > 1000000) ? f.id : Date.now(),
+                isRead: true,
+                favId: f.id || null
+            });
+        });
+        saveExtData();
+    }
+    GlobalState.sceneHistory.items = extD.scene_history;
+
+    let currentReadingIdx = -1;
+
+    const modalHtml = `
+    <div id="t-history-list-modal" class="t-dialog-overlay" style="z-index: 30080;padding: 0;">
+        <div class="t-dialog-box" style="width: 100%; max-width: 100vw;; height: min(86vh, 850px); max-height: 90vh; display:flex; flex-direction:column; border-radius:12px; overflow:hidden; position:relative; background:var(--t-bg-dark, #121212);">
+            
+            <div class="t-header" style="flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:12px 18px;">
+                <span class="t-title-main" style="font-size:1.2em; font-weight:bold; color:var(--t-theme, #8E73B8); letter-spacing:1px;">
+                    <i class="fa-solid fa-feather-pointed" style="color:var(--t-theme, #8E73B8); margin-right:8px;"></i> 浮光手记
+                </span>
+                <span class="t-close" id="t-hl-close">&times;</span>
+            </div>
+            
+            <div style="padding:10px 18px; background:var(--t-bg-panel, rgba(255,255,255,0.5)); border-bottom:1px solid var(--t-border, #E7DDEA); display:flex; justify-content:space-between; align-items:center; font-size:0.85em; color:var(--t-txt, #5E4B70); flex-shrink:0;">
+                <span>共收录 <b id="t-hl-count" style="color:var(--t-theme, #8E73B8); font-size:1.1em;">0</b> 篇手记</span>
+                <button id="t-hl-clear-all" class="t-btn t-btn-xs" style="color:#DDA0B0; border-color:#DDA0B0; padding:3px 10px; font-size:0.82em;"><i class="fa-solid fa-trash"></i> 清空全部</button>
+            </div>
+
+            <div id="t-hl-list" style="flex:1; overflow-y:auto; padding:14px; min-height:0;"></div>
+            <div id="t-hl-reader" style="position:absolute; inset:0; z-index:30; background:var(--t-bg-dark, #121212); display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div class="t-read-header" style="height:54px; padding:0 15px; border-bottom:1px solid var(--t-border, #333); display:flex; align-items:center; justify-content:space-between; background:var(--t-bg-panel, #181818); flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:12px; overflow:hidden; flex-grow:1;">
+                        <i class="fa-solid fa-chevron-left" id="t-hl-read-back" style="cursor:pointer; font-size:1.15em; padding:6px; color:#aaa;" title="返回手记列表"></i>
+                        <div style="display:flex; flex-direction:column; justify-content:center; overflow:hidden;">
+                            <div id="t-hl-read-title" style="font-weight:bold; color:var(--t-txt, #eee); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.95em;"></div>
+                            <div id="t-hl-read-index" style="font-size:0.75em; color:#888;">0 / 0</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-shrink:0; align-items:center;">
+                        <button class="t-tool-btn" id="t-hl-read-rename" title="修改标题"><i class="fa-solid fa-pen"></i></button>
+                        <button class="t-tool-btn" id="t-hl-read-edit" title="编辑内容"><i class="fa-solid fa-pen-nib"></i></button>                     
+                        <button class="t-tool-btn" id="t-hl-read-fav" title="加入收藏画廊" style="color:#ff9f43;"><i class="fa-regular fa-star"></i></button>
+                        <button class="t-tool-btn" id="t-hl-read-img" title="保存高清长图"><i class="fa-solid fa-camera"></i></button>
+                        <button class="t-tool-btn" id="t-hl-read-code" title="复制HTML代码"><i class="fa-solid fa-code"></i></button>
+                        <button class="t-tool-btn" id="t-hl-read-window" title="独立新窗口打开"><i class="fa-solid fa-up-right-from-square"></i></button>
+                        <button class="t-tool-btn" id="t-hl-read-del" title="删除此篇" style="color:#ff6b6b; border-color:#ff6b6b;"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="t-read-body" style="flex:1; overflow-y:auto; padding:0; background:var(--t-bg-dark, #0b0b0b); min-height:0;">
+                    <div id="t-hl-capture-zone" style="width:100%; min-height:100%; display:flex; flex-direction:column;">
+                        <div id="t-hl-read-content" style="width:100%; min-height:100%; flex-grow:1;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>`;
+
+    $("body").append(modalHtml);
+    const renderHistoryItems = () => {
+        const list = extD.scene_history || [];
+        $("#t-hl-count").text(list.length);
+        if (list.length === 0) {
+            $("#t-hl-list").html('<div style="text-align:center; padding:40px; color:#888;">暂无浮光手记，生成后会自动永久收录哦～</div>');
+            return;
+        }
+        const html = list.map((item, idx) => {
+            const timeStr = new Date(item.timestamp).toLocaleString("zh-CN");
+            const tmp = document.createElement("DIV");
+            tmp.innerHTML = item.content;
+            let text = tmp.textContent || tmp.innerText || "";
+            text = text.replace(/\s+/g, " ").trim().substring(0, 75) + "...";
+            return `
+            <div class="t-history-list-item" data-idx="${idx}" style="cursor:pointer; padding:12px 14px; background:var(--t-bg-panel, rgba(255,255,255,0.7)); border:1px solid var(--t-border, #E7DDEA); border-radius:10px; margin-bottom:10px; display:flex; gap:10px; align-items:flex-start; transition:all 0.2s;">
+                <div style="flex:1; min-width:0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                        <span style="color:var(--t-theme, #8E73B8); font-weight:bold; font-size:1.02em;">${item.scriptName || '场景'}</span>
+                        <span style="color:#888; font-size:0.8em;">${timeStr}</span>
+                    </div>
+                    <div style="color:var(--t-txt, #5E4B70); font-size:0.88em; line-height:1.5; opacity:0.85;">${text}</div>
+                </div>
+                <button class="t-btn-del-history" data-idx="${idx}" title="删除" style="background:transparent; border:none; color:#DDA0B0; cursor:pointer; padding:6px; font-size:1.1em; flex-shrink:0;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>`;
+        }).join("");
+        $("#t-hl-list").html(html);
+    };
+
+    const openReader = (idx) => {
+        if (idx < 0 || idx >= extD.scene_history.length) return;
+        currentReadingIdx = idx;
+        const item = extD.scene_history[idx];
+        $("#t-hl-read-title").text(item.scriptName || "场景");
+        $("#t-hl-read-index").text(`${idx + 1} / ${extD.scene_history.length}`);
+        
+        if (item.favId) {
+            $("#t-hl-read-fav").html('<i class="fa-solid fa-star" style="color:#ffd93d;"></i>');
+        } else {
+            $("#t-hl-read-fav").html('<i class="fa-regular fa-star"></i>');
+        }
+
+        const container = document.getElementById("t-hl-read-content");
+        renderToShadowDOMReal(container, item.content);
+        $("#t-hl-reader").css("transform", "translateX(0)");
+    };
+
+    renderHistoryItems();
+
+    $("#t-hl-close").on("click", () => $("#t-history-list-modal").remove());
+    $("#t-history-list-modal").on("click", (e) => {
+        if (e.target === e.currentTarget) $("#t-history-list-modal").remove();
+    });
+
+    $("#t-hl-list").on("click", ".t-history-list-item", function(e) {
+        if ($(e.target).closest(".t-btn-del-history").length) return;
+        const idx = parseInt($(this).data("idx"));
+        openReader(idx);
+    });
+
+    $("#t-hl-read-back").on("click", () => {
+        $("#t-hl-reader").css("transform", "translateX(100%)");
+        renderHistoryItems();
+    });
+    
+        
+    $("#t-hl-read-rename").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        const newTitle = prompt("请输入新标题：", item.scriptName || "场景");
+        if (newTitle === null || !newTitle.trim()) return;
+        item.scriptName = newTitle.trim();
+        saveExtData();
+        $("#t-hl-read-title").text(item.scriptName);
+        if (window.toastr) toastr.success("标题已更新");
+    });
+
+// ── 绛绛专属：浮光手记内容编辑弹窗 ──
+    $("#t-hl-read-edit").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        if ($("#t-hl-edit-dialog").length) return;
+
+        const editDialogHtml = `
+        <div id="t-hl-edit-dialog" class="t-dialog-overlay" style="z-index: 30090; padding: 12px; box-sizing: border-box;">
+            <div class="t-box" style="width: min(860px, 95vw); height: min(78vh, 720px); max-height: 85vh; display:flex; flex-direction:column; border-radius:12px; overflow:hidden; margin:auto;">
+                <div class="t-header" style="flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:12px 18px;">
+                    <span class="t-title-main" style="font-size:1.1em; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-pen-nib"></i> 编辑手记内容
+                    </span>
+                    <span class="t-close" id="t-hl-edit-close">&times;</span>
+                </div>
+                <div style="flex:1; padding:15px; display:flex; flex-direction:column; min-height:0;">
+                    <textarea id="t-hl-edit-textarea" class="t-input" style="flex:1; width:100%; height:100%; resize:none; font-family:var(--t-font-mono, monospace); font-size:13px; line-height:1.55; padding:12px; box-sizing:border-box; outline:none;" spellcheck="false"></textarea>
+                </div>
+                <div class="t-window-footer" style="padding:10px 18px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                    <span id="t-hl-edit-chars" style="font-size:0.85em; opacity:0.75;">字符: 0</span>
+                    <div style="display:flex; gap:10px;">
+                        <button id="t-hl-edit-cancel" class="t-btn">取消</button>
+                        <button id="t-hl-edit-save" class="t-btn primary"><i class="fa-solid fa-check"></i> 保存修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        $("body").append(editDialogHtml);
+        const $txt = $("#t-hl-edit-textarea");
+        $txt.val(item.content || "");
+        
+        const updateCount = () => $("#t-hl-edit-chars").text(`字符: ${$txt.val().length}`);
+        updateCount();
+        $txt.on("input", updateCount);
+
+        // 快捷键 Ctrl + Enter / Command + Enter 保存
+        $txt.on("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                $("#t-hl-edit-save").click();
+            }
+        });
+
+        $("#t-hl-edit-close, #t-hl-edit-cancel").on("click", () => {
+            $("#t-hl-edit-dialog").remove();
+        });
+
+        $("#t-hl-edit-dialog").on("click", (e) => {
+            if (e.target === e.currentTarget) $("#t-hl-edit-dialog").remove();
+        });
+
+        $("#t-hl-edit-save").on("click", () => {
+            const newContent = $txt.val();
+            item.content = newContent;
+            item.timestamp = Date.now();
+            
+            // 如果这条手记同时也收藏在画廊里，同步更新画廊内容
+            if (item.favId && Array.isArray(extD.favs)) {
+                const targetFav = extD.favs.find(f => f.id === item.favId);
+                if (targetFav) {
+                    targetFav.html = newContent;
+                    targetFav.date = new Date().toLocaleString();
+                }
+            }
+            
+            saveExtData();
+            
+            // 实时更新当前正在看的阅读器画面
+            const container = document.getElementById("t-hl-read-content");
+            if (container) {
+                renderToShadowDOMReal(container, item.content);
+            }
+            
+            $("#t-hl-edit-dialog").remove();
+            if (window.toastr) toastr.success("手记内容修改成功！");
+        });
+    });
+    
+    $("#t-hl-read-fav").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        if (!Array.isArray(extD.favs)) extD.favs = [];
+        
+        if (item.favId) {
+            extD.favs = extD.favs.filter(f => f.id !== item.favId);
+            item.favId = null;
+            saveExtData();
+            $("#t-hl-read-fav").html('<i class="fa-regular fa-star"></i>');
+            if (window.toastr) toastr.info("已从收藏画廊移除");
+        } else {
+            const favEntry = {
+                id: Date.now(),
+                title: `${item.scriptName || "场景"} - 阿宴`,
+                charName: "池衿宴",
+                scriptName: item.scriptName || "场景",
+                scriptId: item.scriptId || "",
+                date: new Date().toLocaleString(),
+                html: item.content
+            };
+            extD.favs.unshift(favEntry);
+            item.favId = favEntry.id;
+            saveExtData();
+            $("#t-hl-read-fav").html('<i class="fa-solid fa-star" style="color:#ffd93d;"></i>');
+            if (window.toastr) toastr.success("已同步收藏至画廊！");
+        }
+    });
+        $("#t-hl-read-img").on("click", async function() {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        let offscreen = null;
+        try {
+            $btn.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+            if (typeof htmlToImage === "undefined") {
+                if (window.toastr) toastr.info("正在加载截图组件...");
+                await $.getScript("https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js");
+            }
+
+            // 1. 获取屏幕宽度兜底，防止窄条
+            const onScreenZone = document.getElementById("t-hl-capture-zone");
+            const widthPx = Math.max(Math.ceil(onScreenZone?.getBoundingClientRect?.().width || 900), window.innerWidth || 900);
+
+            // 2. 完美同步画廊高定相框（带你定稿的双层星芒 + Luminous Jottings + 底色）
+            offscreen = createOffscreenExportDom(widthPx);
+            renderToShadowDOMReal(offscreen.content, item.content);
+
+            // 3. 等待字体与图片深度加载完毕
+            await waitForFontsReady(1500);
+            await waitForNextPaint(2);
+            await waitForImagesLoadedDeep(offscreen.root, 5e3);
+            await waitForNextPaint(1);
+
+            // 4. 清除黑底，撑满全屏高清生成
+            const dataUrl = await htmlToImage.toPng(offscreen.zone, {
+                backgroundColor: "#ffffff",
+                pixelRatio: 2,
+                skipAutoScale: true,
+                width: widthPx,
+                style: {
+                    width: widthPx + "px",
+                    maxWidth: widthPx + "px",
+                    overflow: "visible"
+                }
+            });
+
+            const link = document.createElement("a");
+            link.download = `Titania_${item.scriptName || "浮光手记"}_${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+            if (window.toastr) toastr.success("高清长图已保存！");
+        } catch (err) {
+            console.error(err);
+            if (window.toastr) toastr.error("导出图片失败：" + (err?.message || err));
+        } finally {
+            try {
+                if (offscreen?.root) offscreen.root.remove();
+            } catch (e) {}
+            $btn.prop("disabled", false).html(originalHtml);
+        }
+    });
+
+    $("#t-hl-read-code").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        navigator.clipboard.writeText(item.content).then(() => {
+            if (window.toastr) toastr.success("源码已复制到剪贴板");
+        });
+    });
+
+    $("#t-hl-read-window").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        const item = extD.scene_history[currentReadingIdx];
+        openInNewWindow(item.content, item.scriptName || "浮光手记");
+    });
+
+    $("#t-hl-read-del").on("click", () => {
+        if (currentReadingIdx < 0) return;
+        if (!confirm("确定删除此篇手记吗？")) return;
+        extD.scene_history.splice(currentReadingIdx, 1);
+        GlobalState.sceneHistory.items = extD.scene_history;
+        saveExtData();
+        $("#t-hl-reader").css("transform", "translateX(100%)");
+        currentReadingIdx = -1;
+        renderHistoryItems();
+        if (typeof window.updateSceneHistoryNav === "function") window.updateSceneHistoryNav();
+        if (window.toastr) toastr.success("手记已删除");
+    });
+
+    $("#t-hl-list").on("click", ".t-btn-del-history", function(e) {
+        e.stopPropagation();
+        const idx = parseInt($(this).data("idx"));
+        extD.scene_history.splice(idx, 1);
+        GlobalState.sceneHistory.items = extD.scene_history;
+        saveExtData();
+        renderHistoryItems();
+        if (typeof window.updateSceneHistoryNav === "function") window.updateSceneHistoryNav();
+        if (window.toastr) toastr.success("手记已删除");
+    });
+
+    $("#t-hl-clear-all").on("click", function() {
+        if (!extD.scene_history.length) return;
+        if (!confirm("确定清空所有的浮光手记吗？")) return;
+        extD.scene_history.splice(0, extD.scene_history.length);
+        GlobalState.sceneHistory.items = extD.scene_history;
+        saveExtData();
+        renderHistoryItems();
+        if (typeof window.updateSceneHistoryNav === "function") window.updateSceneHistoryNav();
+        if (window.toastr) toastr.info("已清空所有手记");
+    });
+}
+
 function updateRunButtonsState() {
   const $singleBtn = $("#t-btn-run-single");
   const $queueBtn = $("#t-btn-run-queue");
@@ -30989,12 +31631,12 @@ function openQueueSettingsWindow() {
   $("#t-queue-history-dec").on("click", function() {
     const $val = $("#t-queue-history-value");
     let v = parseInt($val.text()) || 5;
-    if (v > 5) $val.text(v - 5);
+    if (v > 5) $val.text(Math.max(5, v - 50));
   });
   $("#t-queue-history-inc").on("click", function() {
     const $val = $("#t-queue-history-value");
     let v = parseInt($val.text()) || 5;
-    if (v < 50) $val.text(v + 5);
+    if (v < 1000) $val.text(v + 50);
   });
   $(".t-queue-script-item").on("click", function(e) {
     if ($(e.target).is("input")) return;
@@ -33495,80 +34137,86 @@ Generate ONLY the continuation (no repetition):`;
   }
 }
 async function handleUserContinuation(options = {}) {
-  const { instruction = "", fromCurrentView = true, autoLocate = true, injectRoundsCount = 3, branchFromCurrentView = false } = options;
+  const { scriptId: customScriptId = "", orderedScenes = [], instruction = "", autoLocate = true } = options;
   if (GlobalState.isGenerating || GlobalState.queueState.isRunning) {
-    if (window.toastr) toastr.info("\u6B63\u5728\u751F\u6210\u4E2D\uFF0C\u8BF7\u7A0D\u5019...", "Titania");
-    return false;
-  }
-  const display = fromCurrentView ? getCurrentDisplayContent() : {
-    content: GlobalState.lastGeneratedContent,
-    scriptId: GlobalState.lastGeneratedScriptId,
-    scriptName: "\u573A\u666F"
-  };
-  const baseContent = (display?.content || "").trim();
-  if (!baseContent) {
-    if (window.toastr) toastr.warning("\u6CA1\u6709\u53EF\u7EED\u5199\u7684\u5185\u5BB9\uFF0C\u8BF7\u5148\u751F\u6210\u573A\u666F", "Titania");
+    if (window.toastr) toastr.info("正在生成中，请稍候...", "Titania");
     return false;
   }
   const validation = validateConnection();
   if (!validation.valid) {
-    const errText = `\u914D\u7F6E\u7F3A\u5931\uFF1A${validation.error}`;
+    const errText = `配置缺失：${validation.error}`;
     alert(errText);
-    TitaniaLogger.error("\u4E3B\u52A8\u7EED\u5199\u914D\u7F6E\u9519\u8BEF", errText);
+    TitaniaLogger.error("主动续写配置错误", errText);
     return false;
   }
-  const scriptId = display?.scriptId || GlobalState.lastGeneratedScriptId || GlobalState.lastUsedScriptId || $("#t-sel-script").val();
-  const script = GlobalState.runtimeScripts.find((s) => s.id === scriptId);
+  const targetScriptId = customScriptId || GlobalState.lastUsedScriptId || GlobalState.lastGeneratedScriptId || $("#t-sel-script").val();
+  const script = GlobalState.runtimeScripts.find((s) => s.id === targetScriptId) || GlobalState.runtimeScripts[0];
   if (!script) {
-    if (window.toastr) toastr.warning("\u672A\u627E\u5230\u5F53\u524D\u5185\u5BB9\u5BF9\u5E94\u7684\u5267\u672C\uFF0C\u65E0\u6CD5\u7EED\u5199", "Titania");
+    if (window.toastr) toastr.warning("未找到可用的剧本预设，无法续写", "Titania");
     return false;
   }
-  if (branchFromCurrentView) {
-    resetContinuationSessionRounds(script.id, script.name);
-    setContinuationSessionBaseRound(script.id, script.name, baseContent, { forceNewBranch: true });
-    TitaniaLogger.info("\u4E3B\u52A8\u7EED\u5199\u5DF2\u521B\u5EFA\u5206\u652F", {
-      scriptId: script.id,
-      scriptName: script.name,
-      baseContentLength: baseContent.length
-    });
+  const scenes = Array.isArray(orderedScenes) ? orderedScenes.filter((s) => s && String(s.content || "").trim()) : [];
+  if (scenes.length === 0) {
+    if (window.toastr) toastr.warning("请先在续写工坊中点选至少 1 篇已生成的小剧场", "Titania");
+    return false;
   }
-  const userInstruction = (instruction || "").trim() || "\u8BF7\u57FA\u4E8E\u4E0A\u8F6E\u5185\u5BB9\u81EA\u7136\u7EED\u5199\u4E0B\u4E00\u6BB5\u5267\u60C5\uFF0C\u4FDD\u6301\u98CE\u683C\u4E00\u81F4\u5E76\u63A8\u8FDB\u60C5\u8282\u3002";
-  const effectiveInjectCount = clampContinuationInjectRounds(injectRoundsCount);
-  const sessionInjection = buildContinuationSessionInjection(script.id, effectiveInjectCount);
-  const promptOverride = `[\u7EED\u5199\u6A21\u5F0F]
-\u4F60\u5C06\u57FA\u4E8E\u5DF2\u6709\u5267\u60C5\u8FDB\u884C\u591A\u8F6E\u7EED\u5199\u751F\u6210\u3002
-\u8BF7\u4FDD\u6301\u4EBA\u7269\u3001\u8BED\u6C14\u3001\u8BBE\u5B9A\u4E0E\u89C6\u89C9\u98CE\u683C\u4E00\u81F4\uFF0C\u5728\u4E0D\u91CD\u590D\u5DF2\u6709\u6587\u672C\u7684\u524D\u63D0\u4E0B\u63A8\u8FDB\u5267\u60C5\u3002
-\u8F93\u51FA\u8981\u6C42\u4E0E\u666E\u901A\u751F\u6210\u4E00\u81F4\uFF1A\u8F93\u51FA\u53EF\u76F4\u63A5\u6E32\u67D3\u7684\u539F\u59CB HTML\uFF0C\u4E0D\u8981 Markdown \u4EE3\u7801\u5757\u3002
 
-[\u7EED\u5199\u4F1A\u8BDD\u4E0A\u4E0B\u6587]
-\uFF08\u4EE5\u4E0B\u4E3A\u5386\u53F2\u7EED\u5199\u8F6E\u6B21\uFF0C\u5305\u542B\u201C\u6307\u4EE4+\u7ED3\u679C\u201D\uFF0C\u7528\u4E8E\u4FDD\u6301\u591A\u8F6E\u8FDE\u7EED\u6027\uFF09
-${sessionInjection.text}
+  const ctx = await getContextData();
+  let evaluatedBasePrompt = script.prompt || "";
+  try {
+    evaluatedBasePrompt = evaluateMacros(evaluatedBasePrompt, { char: ctx.charName, user: ctx.userName });
+  } catch (e) {
+    evaluatedBasePrompt = evaluatedBasePrompt.replace(/{{char}}/gi, ctx.charName).replace(/{{user}}/gi, ctx.userName);
+  }
 
-[\u672C\u8F6E\u7EED\u5199\u6307\u4EE4]
-${userInstruction}`;
-  TitaniaLogger.info("\u4E3B\u52A8\u7EED\u5199\u5DF2\u5207\u6362\u5230\u65B0\u56DE\u5408\u751F\u6210\u6A21\u5F0F", {
-    scriptId: script.id,
-    scriptName: script.name,
-    baseContentLength: baseContent.length,
-    instructionLength: userInstruction.length,
-    injectRoundsCount: effectiveInjectCount,
-    injectedRoundItems: sessionInjection.selectedRounds.length,
-    injectedChars: sessionInjection.estimatedChars,
-    injectedTokensEstimated: sessionInjection.estimatedTokens
+  resetContinuationSessionRounds(script.id, script.name);
+  scenes.forEach((sc, idx) => {
+    if (idx === 0) {
+      setContinuationSessionBaseRound(script.id, script.name, sc.content, { forceNewBranch: true });
+    } else {
+      appendContinuationSessionRound(script.id, script.name, `（前序第${idx + 1}篇）`, sc.content);
+    }
   });
+
+  const nextPartNum = scenes.length + 1;
+  const scenesBlock = scenes.map((sc, idx) => {
+    return `=== 【第 ${idx + 1} 篇】（标题：${sc.scriptName || script.name}） ===\n${String(sc.content || "").trim()}`;
+  }).join("\n\n");
+
+  const userInstruction = (instruction || "").trim() || `请紧接【第 ${scenes.length} 篇】的结尾，自然推进并创作【第 ${nextPartNum} 篇】剧情，保持人设、文风与 HTML/CSS 视觉卡片样式完全一致。`;
+
+  const promptOverride = `[核心剧本预设与视觉样式要求]
+（请严格遵循以下剧本预设的主题设定与 CSS 视觉卡片样式要求）
+${evaluatedBasePrompt}
+
+[前序已生成剧场（共 ${scenes.length} 篇，已按剧情先后顺序 1 → ${scenes.length} 排列）]
+（以下是按顺序已经发生的第 1 篇至第 ${scenes.length} 篇小剧场完整内容与 HTML 结构。请仔细阅读以保持剧情连贯，并完全沿用其 HTML/CSS 卡片样式风格，绝对不要重复已经写过的内容！）
+
+${scenesBlock}
+
+[本轮任务：续写【第 ${nextPartNum} 篇】]
+1. 请紧接上面【第 ${scenes.length} 篇】的末尾，继续往后创作【第 ${nextPartNum} 篇】小剧场，绝不重复前文。
+2. 严格复用前序篇章的 HTML 容器结构与 CSS 样式（包含完整的 <style> 或内联样式，确保本篇可作为独立卡片完美渲染）。
+3. 本篇续写方向与具体要求：
+${userInstruction}`;
+
   if (autoLocate === true) {
     unlockDisplay();
   }
-  if (window.toastr) toastr.info("\u{1F504} \u6B63\u5728\u57FA\u4E8E\u5F53\u524D\u5267\u573A\u4E0E\u7EED\u5199\u6307\u4EE4\u751F\u6210\u65B0\u56DE\u5408...", "Titania Echo");
+  if (window.toastr) {
+    toastr.info(`🔄 已按顺序装载前 ${scenes.length} 篇，正在续写【第 ${nextPartNum} 篇】...`, "Titania Echo");
+  }
+
+  const totalChars = scenesBlock.length;
   const success = await handleGenerate(script.id, false, {
     promptOverride,
     skipMacroEvaluation: true,
     keepOverlayOpen: true,
     source: "user_continuation",
-    injectRoundsCount: effectiveInjectCount,
-    injectedRoundItems: sessionInjection.selectedRounds.length,
-    injectedChars: sessionInjection.estimatedChars,
-    injectedTokensEstimated: sessionInjection.estimatedTokens
+    injectRoundsCount: scenes.length,
+    injectedRoundItems: scenes.length,
+    injectedChars: totalChars,
+    injectedTokensEstimated: estimateTokensByChars(totalChars)
   });
   if (success) {
     appendContinuationSessionRound(script.id, script.name, userInstruction, GlobalState.lastGeneratedContent);
